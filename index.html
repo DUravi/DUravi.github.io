@@ -3,169 +3,202 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ravi DU</title>
+<title>Ravi's Simulations Lab</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
 <style>
-    *{
-        margin:0;
-        padding:0;
-        box-sizing:border-box;
-        font-family:Arial, sans-serif;
-    }
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Poppins',sans-serif;
+}
 
-    body{
-        background:#f4f7fb;
-        color:#333;
-    }
+body{
+    background:linear-gradient(135deg,#74ebd5,#ACB6E5);
+    min-height:100vh;
+    color:#222;
+}
 
-    header{
-        background:linear-gradient(135deg,#2563eb,#1e40af);
-        color:white;
-        padding:25px;
-        text-align:center;
-    }
+header{
+    text-align:center;
+    padding:30px 20px;
+    color:white;
+    position:relative;
+}
 
-    header h1{
-        font-size:2.2rem;
-    }
+header h1{
+    font-size:2.5rem;
+    font-weight:700;
+}
 
-    .search-box{
-        max-width:500px;
-        margin:20px auto;
-        text-align:center;
-    }
+header p{
+    margin-top:10px;
+    font-size:1.1rem;
+}
 
-    .search-box input{
-        width:90%;
-        padding:14px;
-        border:none;
-        border-radius:10px;
-        font-size:16px;
-        box-shadow:0 4px 10px rgba(0,0,0,0.1);
-    }
+.floating{
+    position:absolute;
+    font-size:2rem;
+    animation:float 4s ease-in-out infinite;
+}
 
-    .grid{
-        display:grid;
-        grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
-        gap:20px;
-        padding:30px;
-        max-width:1200px;
-        margin:auto;
-    }
+.f1{top:20px; left:10%;}
+.f2{top:50px; right:12%;}
+.f3{top:90px; left:20%;}
 
-    .card{
-        background:white;
-        padding:20px;
-        border-radius:15px;
-        box-shadow:0 8px 20px rgba(0,0,0,0.08);
-        transition:0.3s;
-        cursor:pointer;
-    }
+@keyframes float{
+    0%,100%{transform:translateY(0);}
+    50%{transform:translateY(-10px);}
+}
 
-    .card:hover{
-        transform:translateY(-5px);
-    }
+.search-box{
+    max-width:550px;
+    margin:20px auto;
+    text-align:center;
+}
 
-    .card h3{
-        color:#1e40af;
-        margin-bottom:10px;
-    }
+.search-box input{
+    width:90%;
+    padding:15px 20px;
+    border:none;
+    border-radius:50px;
+    font-size:16px;
+    box-shadow:0 8px 20px rgba(0,0,0,0.15);
+    outline:none;
+}
 
-    .card p{
-        color:#666;
-        font-size:14px;
-    }
+.grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+    gap:25px;
+    padding:30px;
+    max-width:1300px;
+    margin:auto;
+}
 
-    .modal{
-        display:none;
-        position:fixed;
-        top:0;
-        left:0;
-        width:100%;
-        height:100%;
-        background:rgba(0,0,0,0.85);
-        z-index:1000;
-        justify-content:center;
-        align-items:center;
-    }
+.card{
+    background:white;
+    padding:25px;
+    border-radius:25px;
+    box-shadow:0 12px 30px rgba(0,0,0,0.12);
+    cursor:pointer;
+    transition:0.35s ease;
+    position:relative;
+    overflow:hidden;
+}
 
-    .modal-content{
-        width:90%;
-        height:85%;
-        background:white;
-        border-radius:15px;
-        overflow:hidden;
-        position:relative;
-    }
+.card::before{
+    content:'';
+    position:absolute;
+    top:0;
+    left:0;
+    width:100%;
+    height:6px;
+    background:linear-gradient(90deg,#ff758c,#ff7eb3);
+}
 
-    .close{
-        position:absolute;
-        top:10px;
-        right:20px;
-        font-size:30px;
-        cursor:pointer;
-        z-index:10;
-        color:#000;
-    }
+.card:hover{
+    transform:translateY(-10px) scale(1.03);
+    box-shadow:0 20px 40px rgba(0,0,0,0.18);
+}
 
-    iframe{
-        width:100%;
-        height:100%;
-        border:none;
-    }
+.card h3{
+    color:#4f46e5;
+    margin-bottom:10px;
+    font-size:1.2rem;
+}
 
-    footer{
-        text-align:center;
-        padding:20px;
-        color:#666;
-        font-size:14px;
-    }
+.card p{
+    color:#555;
+    font-size:14px;
+}
+
+.modal{
+    display:none;
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,0.85);
+    z-index:1000;
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+}
+
+.modal-content{
+    width:95%;
+    height:90%;
+    background:white;
+    border-radius:20px;
+    overflow:hidden;
+    position:relative;
+    box-shadow:0 0 40px rgba(255,255,255,0.2);
+}
+
+.close{
+    position:absolute;
+    top:12px;
+    right:20px;
+    font-size:32px;
+    font-weight:bold;
+    color:#111;
+    cursor:pointer;
+    z-index:10;
+}
+
+iframe{
+    width:100%;
+    height:100%;
+    border:none;
+}
+
+footer{
+    text-align:center;
+    padding:25px;
+    color:white;
+    font-size:14px;
+}
 </style>
 </head>
 <body>
 
 <header>
-    <h1>Interactive Simulations</h1>
-    <p>By - Ravi Chaudhary { University of Delhi }</p>
+    <div class="floating f1">⚡</div>
+    <div class="floating f2">🧪</div>
+    <div class="floating f3">🚀</div>
+
+    <h1>🎓 Simulations Lab</h1>
+    <p>Learn Science & Math Through Fun Interactive Experiments!</p>
 </header>
 
 <div class="search-box">
-    <input type="text" id="searchInput" placeholder="Search simulations...">
+    <input type="text" id="searchInput" placeholder="🔍 Search simulations...">
 </div>
 
 <div class="grid" id="simGrid">
 
-   <div class="card" onclick="openSim('https://phet.colorado.edu/sims/html/circuit-construction-kit-dc/latest/circuit-construction-kit-dc_en.html')">
-    <h3>Circuit Construction Kit: DC</h3>
-    <p>Build and test electrical circuits with batteries, bulbs, and wires.</p>
-   </div> 
-   <div class="card" onclick="openSim('https://phet.colorado.edu/sims/html/projectile-motion/latest/projectile-motion_en.html')">
-        <h3>Projectile Motion</h3>
-        <p>Learn motion of objects under gravity.</p>
+    <div class="card" onclick="openSim('https://phet.colorado.edu/sims/html/projectile-motion/latest/projectile-motion_en.html')">
+        <h3>🚀 Projectile Motion</h3>
+        <p>Learn how objects move under gravity.</p>
     </div>
 
     <div class="card" onclick="openSim('https://phet.colorado.edu/sims/html/ohms-law/latest/ohms-law_en.html')">
-        <h3>Ohm's Law</h3>
+        <h3>⚡ Ohm's Law</h3>
         <p>Understand voltage, current and resistance.</p>
     </div>
 
+    <div class="card" onclick="openSim('https://phet.colorado.edu/sims/html/circuit-construction-kit-dc/latest/circuit-construction-kit-dc_en.html')">
+        <h3>🔌 Circuit Construction Kit</h3>
+        <p>Build real electrical circuits virtually.</p>
+    </div>
+
     <div class="card" onclick="openSim('https://phet.colorado.edu/sims/html/density/latest/density_en.html')">
-        <h3>Density</h3>
-        <p>Explore mass, volume and density relationships.</p>
-    </div>
-
-    <div class="card" onclick="openSim('https://phet.colorado.edu/sims/html/wave-on-a-string/latest/wave-on-a-string_en.html')">
-        <h3>Wave on a String</h3>
-        <p>Visualize wave motion and properties.</p>
-    </div>
-
-    <div class="card" onclick="openSim('https://phet.colorado.edu/sims/html/gas-properties/latest/gas-properties_en.html')">
-        <h3>Gas Properties</h3>
-        <p>Understand pressure, volume and temperature.</p>
-    </div>
-
-    <div class="card" onclick="openSim('https://phet.colorado.edu/sims/html/balancing-act/latest/balancing-act_en.html')">
-        <h3>Balancing Act</h3>
-        <p>Learn torque and equilibrium.</p>
+        <h3>🧊 Density</h3>
+        <p>Explore mass, volume and density.</p>
     </div>
 
 </div>
@@ -177,12 +210,17 @@
     </div>
 </div>
 
+<audio id="clickSound" preload="auto">
+    <source src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3" type="audio/mpeg">
+</audio>
+
 <footer>
-    Simulations by Ravi Kumar 2194062, University of Delhi 2025.
+    Built by Ravi 2194062, University of Delhi 2025
 </footer>
 
 <script>
 function openSim(url){
+    document.getElementById('clickSound').play();
     document.getElementById('simFrame').src = url;
     document.getElementById('simModal').style.display = 'flex';
 }
