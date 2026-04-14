@@ -1,109 +1,203 @@
 <!DOCTYPE html>
-
-
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sorting Visualizer</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DU Ravi Simulations</title>
+<style>
+    *{
+        margin:0;
+        padding:0;
+        box-sizing:border-box;
+        font-family:Arial, sans-serif;
+    }
 
-    <link rel="stylesheet" href="./css/style.css">
+    body{
+        background:#f4f7fb;
+        color:#333;
+    }
 
+    header{
+        background:linear-gradient(135deg,#2563eb,#1e40af);
+        color:white;
+        padding:25px;
+        text-align:center;
+    }
+
+    header h1{
+        font-size:2.2rem;
+    }
+
+    .search-box{
+        max-width:500px;
+        margin:20px auto;
+        text-align:center;
+    }
+
+    .search-box input{
+        width:90%;
+        padding:14px;
+        border:none;
+        border-radius:10px;
+        font-size:16px;
+        box-shadow:0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    .grid{
+        display:grid;
+        grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+        gap:20px;
+        padding:30px;
+        max-width:1200px;
+        margin:auto;
+    }
+
+    .card{
+        background:white;
+        padding:20px;
+        border-radius:15px;
+        box-shadow:0 8px 20px rgba(0,0,0,0.08);
+        transition:0.3s;
+        cursor:pointer;
+    }
+
+    .card:hover{
+        transform:translateY(-5px);
+    }
+
+    .card h3{
+        color:#1e40af;
+        margin-bottom:10px;
+    }
+
+    .card p{
+        color:#666;
+        font-size:14px;
+    }
+
+    .modal{
+        display:none;
+        position:fixed;
+        top:0;
+        left:0;
+        width:100%;
+        height:100%;
+        background:rgba(0,0,0,0.85);
+        z-index:1000;
+        justify-content:center;
+        align-items:center;
+    }
+
+    .modal-content{
+        width:90%;
+        height:85%;
+        background:white;
+        border-radius:15px;
+        overflow:hidden;
+        position:relative;
+    }
+
+    .close{
+        position:absolute;
+        top:10px;
+        right:20px;
+        font-size:30px;
+        cursor:pointer;
+        z-index:10;
+        color:#000;
+    }
+
+    iframe{
+        width:100%;
+        height:100%;
+        border:none;
+    }
+
+    footer{
+        text-align:center;
+        padding:20px;
+        color:#666;
+        font-size:14px;
+    }
+</style>
 </head>
 <body>
 
-    <header>
-        <nav>
-            <div class="array-inputs">
-                <p>Size of the array:</p>
-                <input id="a_size" type="range" min=20 max=150 step=1 value=80>
-                <p>Speed of the algorithm:</p>
-                <input id="a_speed" type="range" min=1 max=5 step=1 value=4>
-                <button id="a_generate">Generate New Array!</button>
-            </div>
+<header>
+    <h1>DU Ravi Interactive Simulations</h1>
+    <p>Explore Science & Math Simulations</p>
+</header>
 
-            <div class="header_right">
-                <p class="nav-heading">Sorting visualizer</p>
+<div class="search-box">
+    <input type="text" id="searchInput" placeholder="Search simulations...">
+</div>
 
-                <div class="algos">
-                    <button >Bubble</button>
-                    <button >Selection</button>
-                    <button >Insertion</button>
-                    <button >Merge</button>
-                    <button >Quick</button>
-                    <button style="margin-right: 0px;">Heap</button>
-                </div>
-            </div>
+<div class="grid" id="simGrid">
 
-        </nav>
-    </header>
+    <div class="card" onclick="openSim('https://phet.colorado.edu/sims/html/projectile-motion/latest/projectile-motion_en.html')">
+        <h3>Projectile Motion</h3>
+        <p>Learn motion of objects under gravity.</p>
+    </div>
 
-    <section>
+    <div class="card" onclick="openSim('https://phet.colorado.edu/sims/html/ohms-law/latest/ohms-law_en.html')">
+        <h3>Ohm's Law</h3>
+        <p>Understand voltage, current and resistance.</p>
+    </div>
 
-        <div id="Info_Cont1">
+    <div class="card" onclick="openSim('https://phet.colorado.edu/sims/html/density/latest/density_en.html')">
+        <h3>Density</h3>
+        <p>Explore mass, volume and density relationships.</p>
+    </div>
 
-            <h3>TIME COMPLEXITY</h3>
+    <div class="card" onclick="openSim('https://phet.colorado.edu/sims/html/wave-on-a-string/latest/wave-on-a-string_en.html')">
+        <h3>Wave on a String</h3>
+        <p>Visualize wave motion and properties.</p>
+    </div>
 
-            <div class="Complexity_Containers" id="Time_Complexity_Types_Container">
+    <div class="card" onclick="openSim('https://phet.colorado.edu/sims/html/gas-properties/latest/gas-properties_en.html')">
+        <h3>Gas Properties</h3>
+        <p>Understand pressure, volume and temperature.</p>
+    </div>
 
-                <div class="Pair_Definitions">
-                    <p class="Sub_Heading">Worst case:</p>
-                    <p id="Time_Worst"></p>
-                </div>
-                
-                <div class="Pair_Definitions">
-                    <p class="Sub_Heading">Average case:</p>
-                    <p id="Time_Average"></p>
-                </div>
-                
-                <div class="Pair_Definitions">
-                    <p class="Sub_Heading">Best case:</p>
-                    <p id="Time_Best"></p>
-                </div>
+    <div class="card" onclick="openSim('https://phet.colorado.edu/sims/html/balancing-act/latest/balancing-act_en.html')">
+        <h3>Balancing Act</h3>
+        <p>Learn torque and equilibrium.</p>
+    </div>
 
-            </div>
+</div>
 
-        </div>
+<div class="modal" id="simModal">
+    <div class="modal-content">
+        <span class="close" onclick="closeSim()">&times;</span>
+        <iframe id="simFrame"></iframe>
+    </div>
+</div>
 
-        <div id="array_container">
-            
-        </div>
-
-        <div id="Info_Cont2">
-
-            <h3>SPACE COMPLEXITY</h3>
-
-            <div class="Complexity_Containers" id="Space_Complexity_Types_Container">
-
-                <div class="Pair_Definitions">
-                    <p class="Sub_Heading">Worst case:</p>
-                    <p id="Space_Worst"></p>
-                </div>
-                
-            </div>
-
-        </div>
-
-    </section>
-
-    <footer>
-
-    </footer>
-
-    <script src="./scripts/main.js"></script>   <!--This should be at the end of body and should be loaded before sorts.js-->
-    <script src="./scripts/visualizations.js"></script>  <!--This should be loaded after main.js-->
-
-    <script src="./scripts/bubble_sort.js"></script>
-    <script src="./scripts/selection_sort.js"></script>
-    <script src="./scripts/insertion_sort.js"></script>
-    <script src="./scripts/merge_sort.js"></script>
-    <script src="./scripts/quick_sort.js"></script>
-    <script src="./scripts/heap_sort.js"></script>
 <footer>
-    <p>&copy; 2023 RAVI KUMAR | Roll Number: 21/94062 | Dyal Singh College</p>
+    Simulations by PhET Interactive Simulations, University of Colorado Boulder.
 </footer>
 
+<script>
+function openSim(url){
+    document.getElementById('simFrame').src = url;
+    document.getElementById('simModal').style.display = 'flex';
+}
+
+function closeSim(){
+    document.getElementById('simModal').style.display = 'none';
+    document.getElementById('simFrame').src = '';
+}
+
+document.getElementById('searchInput').addEventListener('keyup', function(){
+    let filter = this.value.toLowerCase();
+    let cards = document.querySelectorAll('.card');
+
+    cards.forEach(card=>{
+        let text = card.innerText.toLowerCase();
+        card.style.display = text.includes(filter) ? 'block' : 'none';
+    });
+});
+</script>
+
 </body>
-
-
 </html>
