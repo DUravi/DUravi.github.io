@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Electric Circuit Game</title>
+
+<style>
+/* =========================
+   BASIC PAGE STYLING
+========================= */
+body{
+    margin:0;
+    font-family:'Comic Sans MS', cursive, sans-serif;
+    background:linear-gradient(135deg,#b3ecff,#d9b3ff);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+    padding:20px;
+}
+
+.game-container{
+    background:#fff;
+    border-radius:25px;
+    padding:20px;
+    max-width:950px;
+    width:100%;
+    box-shadow:0 10px 30px rgba(0,0,0,0.2);
+    text-align:center;
+}
+
+h1{
+    color:#6a00ff;
+    margin-bottom:10px;
+}
+
+.instructions{
+    background:#f3f0ff;
+    padding:12px;
+    border-radius:15px;
+    margin-bottom:20px;
+    font-size:15px;
+}
+
+/* =========================
+   GAME AREA
+========================= */
+.circuit-board{
+    position:relative;
+    width:100%;
+    max-width:850px;
+    height:420px;
+    margin:auto;
+    background:#eef7ff;
+    border:4px dashed #9ed0ff;
+    border-radius:20px;
+    overflow:hidden;
+}
+
+/* Circuit slots */
+.slot{
+    position:absolute;
+    width:90px;
+    height:90px;
+    border:3px dashed #999;
+    border-radius:18px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:14px;
+    color:#666;
+    background:#fff;
+}
+
+/* Draggable parts */
+.parts{
+    display:flex;
+    justify-content:center;
+    gap:15px;
+    flex-wrap:wrap;
+    margin-top:20px;
+}
+
+.part{
+    width:90px;
+    height:90px;
+    background:#fff;
+    border-radius:20px;
+    border:3px solid #ddd;
+    cursor:grab;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:40px;
+    user-select:none;
+    transition:0.2s;
+}
+
+.part:hover{
+    transform:scale(1.08);
+}
+
+/* Glow Bulb Animation */
+.glow{
+    animation:glowBulb 1s infinite alternate;
+}
+
+@keyframes glowBulb{
+    from{filter:drop-shadow(0 0 5px yellow);}
+    to{filter:drop-shadow(0 0 25px gold);}
+}
+
+/* Electric flow animation */
+.flow-line{
+    position:absolute;
+    height:8px;
+    background:linear-gradient(90deg,#00f,#0ff,#00f);
+    border-radius:10px;
+    animation:flow 1s linear infinite;
+}
+
+@keyframes flow{
+    from{background-position:0 0;}
+    to{background-position:100px 0;}
+}
+
+/* Buttons */
+.buttons{
+    margin-top:20px;
+}
+
+button{
+    background:#6a00ff;
+    color:#fff;
+    border:none;
+    padding:12px 20px;
+    border-radius:14px;
+    font-size:16px;
+    cursor:pointer;
+    margin:5px;
+}
+
+button:hover{
+    background:#5200cc;
+}
+
+/* Message */
+.message{
+    margin-top:15px;
+    font-size:20px;
+    font-weight:bold;
+    min-height:30px;
+}
+
+/* Responsive */
+@media(max-width:768px){
+    .circuit-board{
+        height:500px;
+    }
+
+    .slot{
+        width:75px;
+        height:75px;
+        font-size:12px;
+    }
+
+    .part{
+        width:75px;
+        height:75px;
+        font-size:32px;
+    }
+}
+</style>
+</head>
+<body>
+
+<div class="game-container">
+    <h1>⚡ Electric Circuit Game ⚡</h1>
+
+    <div class="instructions">
+        Drag the parts into the correct places to make a <b>complete electric circuit</b>!<br>
+        The bulb glows only when the circuit is complete.
+    </div>
+
+    <!-- GAME BOARD -->
+    <div class="circuit-board" id="board">
+
+        <!-- Slots -->
+        <div class="slot" data-correct="battery" style="top:40px; left:40px;">Battery</div>
+        <div class="slot" data-correct="wire1" style="top:40px; right:40px;">Wire</div>
+        <div class="slot" data-correct="bulb" style="bottom:40px; right:40px;">Bulb</div>
+        <div class="slot" data-correct="switch" style="bottom:40px; left:40px;">Switch</div>
+
+    </div>
+
+    <!-- PARTS TO DRAG -->
+    <div class="parts">
+        <div class="part" draggable="true" data-part="battery">🔋</div>
+        <div class="part" draggable="true" data-part="wire1">〰️</div>
+        <div class="part" draggable="true" data-part="bulb">💡</div>
+        <div class="part" draggable="true" data-part="switch">🎚️</div>
+    </div>
+
+    <div class="buttons">
+        <button onclick="checkCircuit()">Check Circuit</button>
+        <button onclick="resetGame()">Reset</button>
+    </div>
+
+    <div class="message" id="message"></div>
+</div>
+
+<script>
+/* =========================
+   DRAG & DROP LOGIC
+========================= */
+const parts = document.querySelectorAll('.part');
+const slots = document.querySelectorAll('.slot');
+
+parts.forEach(part => {
+    part.addEventListener('dragstart', dragStart);
+});
+
+slots.forEach(slot => {
+    slot.addEventListener('dragover', dragOver);
+    slot.addEventListener('drop', dropPart);
+});
+
+let draggedPart = null;
+
+function dragStart(e){
+    draggedPart = this;
+}
+
+function dragOver(e){
+    e.preventDefault();
+}
+
+function dropPart(e){
+    e.preventDefault();
+
+    // Prevent replacing existing item
+    if(this.children.length > 0) return;
+
+    this.innerHTML = '';
+    this.appendChild(draggedPart);
+}
+
+/* =========================
+   CHECK CIRCUIT
+========================= */
+function checkCircuit(){
+    let correct = true;
+
+    slots.forEach(slot=>{
+        const placed = slot.querySelector('.part');
+        if(!placed || placed.dataset.part !== slot.dataset.correct){
+            correct = false;
+        }
+    });
+
+    const message = document.getElementById('message');
+
+    if(correct){
+        message.style.color = 'green';
+        message.innerHTML = '🎉 Great Job! The Circuit is Complete!';
+        activateCircuit();
+        playSuccessSound();
+    }else{
+        message.style.color = 'red';
+        message.innerHTML = '❌ Try connecting all parts in a loop!';
+        deactivateCircuit();
+    }
+}
+
+/* =========================
+   ACTIVATE CIRCUIT ANIMATION
+========================= */
+function activateCircuit(){
+    const bulbSlot = [...slots].find(s => s.dataset.correct === 'bulb');
+    const bulb = bulbSlot.querySelector('.part');
+
+    if(bulb){
+        bulb.classList.add('glow');
+    }
+
+    createFlowLines();
+}
+
+/* Remove animations */
+function deactivateCircuit(){
+    document.querySelectorAll('.part').forEach(p=>p.classList.remove('glow'));
+    document.querySelectorAll('.flow-line').forEach(line=>line.remove());
+}
+
+/* =========================
+   FLOW LINES / SPARK ANIMATION
+========================= */
+function createFlowLines(){
+    deactivateCircuit();
+
+    const board = document.getElementById('board');
+
+    const lines = [
+        {top:'80px', left:'140px', width:'570px'},
+        {top:'140px', right:'80px', width:'8px', height:'180px'},
+        {bottom:'80px', left:'140px', width:'570px'},
+        {top:'140px', left:'80px', width:'8px', height:'180px'}
+    ];
+
+    lines.forEach(styleObj=>{
+        const line = document.createElement('div');
+        line.classList.add('flow-line');
+
+        for(let key in styleObj){
+            line.style[key] = styleObj[key];
+        }
+
+        if(styleObj.height){
+            line.style.width='8px';
+            line.style.height=styleObj.height;
+        }
+
+        board.appendChild(line);
+    });
+
+    // Re-add glow
+    const bulb = document.querySelector('[data-correct="bulb"] .part');
+    if(bulb) bulb.classList.add('glow');
+}
+
+/* =========================
+   SUCCESS SOUND
+========================= */
+function playSuccessSound(){
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(600, ctx.currentTime);
+    osc.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.2);
+}
+
+/* =========================
+   RESET GAME
+========================= */
+function resetGame(){
+    deactivateCircuit();
+
+    document.getElementById('message').innerHTML='';
+
+    const partsContainer = document.querySelector('.parts');
+
+    slots.forEach(slot=>{
+        const part = slot.querySelector('.part');
+        if(part){
+            partsContainer.appendChild(part);
+            slot.innerHTML = slot.dataset.correct.charAt(0).toUpperCase() + slot.dataset.correct.slice(1).replace('1','');
+        }
+    });
+}
+</script>
+
+</body>
+</html>
