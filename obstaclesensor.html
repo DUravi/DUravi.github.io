@@ -7,7 +7,7 @@
 
 <style>
 /* =========================
-   PAGE STYLING
+   PAGE
 ========================= */
 body{
     margin:0;
@@ -22,10 +22,10 @@ body{
 .game-container{
     background:#fff;
     width:100%;
-    max-width:1100px;
+    max-width:1150px;
     border-radius:25px;
     padding:20px;
-    box-shadow:0 10px 30px rgba(0,0,0,0.2);
+    box-shadow:0 10px 30px rgba(0,0,0,.2);
     text-align:center;
 }
 h1{color:#6a00ff;}
@@ -34,15 +34,16 @@ h1{color:#6a00ff;}
     padding:12px;
     border-radius:15px;
     margin-bottom:18px;
-    font-size:15px;
 }
 
-/* BOARD */
+/* =========================
+   BOARD
+========================= */
 .circuit-board{
     position:relative;
     width:100%;
-    max-width:950px;
-    height:520px;
+    max-width:980px;
+    height:540px;
     margin:auto;
     background:#eef8ff;
     border:4px dashed #9ed0ff;
@@ -50,15 +51,26 @@ h1{color:#6a00ff;}
     overflow:hidden;
 }
 
-/* FIXED CIRCUIT WIRES */
+/* WIRING */
 .wire-path{
     position:absolute;
-    background:#444;
+    background:#555;
     border-radius:10px;
-    opacity:.18;
+    opacity:.25;
+    transition:.3s;
 }
-.wire-horizontal{height:10px;}
-.wire-vertical{width:10px;}
+.wire-horizontal{height:12px;}
+.wire-vertical{width:12px;}
+
+/* ACTIVE CURRENT GLOW */
+.wire-path.active{
+    background:#00e5ff;
+    box-shadow:
+        0 0 10px #00e5ff,
+        0 0 20px #00e5ff,
+        0 0 35px #00e5ff;
+    opacity:1;
+}
 
 /* SLOTS */
 .slot{
@@ -97,7 +109,6 @@ h1{color:#6a00ff;}
     cursor:pointer;
     transition:.25s;
     user-select:none;
-    touch-action:manipulation;
 }
 .part.selected{
     border-color:#6a00ff;
@@ -105,7 +116,6 @@ h1{color:#6a00ff;}
     box-shadow:0 0 15px rgba(106,0,255,.35);
 }
 
-/* SENSOR IMAGE */
 .sensor-part img{
     width:85%;
     height:85%;
@@ -113,36 +123,75 @@ h1{color:#6a00ff;}
     pointer-events:none;
 }
 
-/* OBSTACLE ICON */
+/* HAND ICON */
 .obstacle-icon{
     position:absolute;
-    top:205px;
-    right:180px;
+    top:210px;
+    right:150px;
     width:90px;
     height:90px;
     border-radius:50%;
-    background:radial-gradient(circle,#222 20%,#444 60%,#666 100%);
-    border:4px solid #00e5ff;
+    background:#fff;
+    border:4px solid #6a00ff;
     display:flex;
     align-items:center;
     justify-content:center;
-    font-size:40px;
+    font-size:42px;
     cursor:pointer;
     z-index:10;
-    user-select:none;
     transition:.3s;
 }
 .obstacle-icon.active{
-    background:radial-gradient(circle,#ff9800,#ff5722);
-    border-color:#ffd54f;
     transform:scale(1.1);
+    background:#fff3cd;
+}
+
+/* RADIO WAVES */
+.wave{
+    position:absolute;
+    width:0;
+    height:6px;
+    background:#ff4d4d;
+    top:250px;
+    right:250px;
+    border-radius:10px;
+    transform-origin:right center;
+    opacity:0;
+    z-index:8;
+}
+.wave.active{
+    animation:waveMove 1s infinite;
+}
+
+@keyframes waveMove{
+    0%{
+        width:0;
+        opacity:0;
+    }
+    25%{
+        width:70px;
+        opacity:1;
+    }
+    50%{
+        width:140px;
+        opacity:1;
+    }
+    75%{
+        width:70px;
+        opacity:1;
+        background:#00c853;
+    }
+    100%{
+        width:0;
+        opacity:0;
+    }
 }
 
 /* BULB */
 .glow{
-    animation:glowBulb .7s infinite alternate ease-in-out;
+    animation:bulbGlow .7s infinite alternate ease-in-out;
 }
-@keyframes glowBulb{
+@keyframes bulbGlow{
     from{
         transform:scale(1);
         filter:drop-shadow(0 0 10px yellow);
@@ -155,21 +204,10 @@ h1{color:#6a00ff;}
     }
 }
 
-/* CURRENT FLOW */
-.current-dot{
-    position:absolute;
-    width:16px;
-    height:16px;
-    background:#00e5ff;
-    border-radius:50%;
-    box-shadow:0 0 12px #00e5ff;
-    z-index:5;
-}
-
 /* BUTTONS */
 button{
     background:#6a00ff;
-    color:white;
+    color:#fff;
     border:none;
     padding:14px 22px;
     font-size:17px;
@@ -177,11 +215,8 @@ button{
     margin:10px;
     cursor:pointer;
 }
-button:hover{
-    background:#5200cc;
-}
+button:hover{background:#5200cc;}
 
-/* MESSAGE */
 .message{
     margin-top:15px;
     font-size:20px;
@@ -196,31 +231,32 @@ button:hover{
     <h1>🚧 Obstacle Sensor Circuit Game</h1>
 
     <div class="instructions">
-        Build the circuit, then touch the obstacle icon to simulate detection.
+        Build the circuit, then touch the hand icon to place obstacle.<br>
+        Watch the sensor send and receive waves!
     </div>
 
     <div class="circuit-board" id="board">
 
-        <!-- WIRING -->
-        <div class="wire-path wire-horizontal" style="top:100px; left:155px; width:640px;"></div>
-        <div class="wire-path wire-vertical" style="top:155px; right:100px; height:210px;"></div>
-        <div class="wire-path wire-horizontal" style="bottom:100px; left:155px; width:640px;"></div>
-        <div class="wire-path wire-vertical" style="top:155px; left:100px; height:210px;"></div>
+        <!-- WIRES -->
+        <div class="wire-path wire-horizontal" style="top:100px; left:155px; width:660px;"></div>
+        <div class="wire-path wire-vertical" style="top:155px; right:100px; height:220px;"></div>
+        <div class="wire-path wire-horizontal" style="bottom:100px; left:155px; width:660px;"></div>
+        <div class="wire-path wire-vertical" style="top:155px; left:100px; height:220px;"></div>
 
         <!-- COMPONENT SLOTS -->
         <div class="slot" data-correct="battery" style="top:40px; left:40px;">Battery</div>
-
         <div class="slot" data-correct="sensor" style="top:40px; right:40px;">Sensor</div>
-
         <div class="slot" data-correct="bulb" style="bottom:40px; right:40px;">Bulb</div>
-
         <div class="slot" data-correct="wire" style="bottom:40px; left:40px;">Wire</div>
 
-        <!-- OBSTACLE -->
+        <!-- RADIO WAVE -->
+        <div class="wave" id="wave"></div>
+
+        <!-- HAND ICON -->
         <div class="obstacle-icon" id="obstacleIcon">✋</div>
     </div>
 
-    <!-- COMPONENTS -->
+    <!-- PARTS -->
     <div class="parts">
         <div class="part" data-part="battery">🔋</div>
 
@@ -229,7 +265,6 @@ button:hover{
         </div>
 
         <div class="part" data-part="bulb">💡</div>
-
         <div class="part" data-part="wire">〰️</div>
     </div>
 
@@ -244,7 +279,6 @@ button:hover{
 <script>
 let selectedPart=null;
 let circuitReady=false;
-let currentInterval=null;
 
 /* SELECT PART */
 document.querySelectorAll('.part').forEach(part=>{
@@ -284,29 +318,28 @@ function checkCircuit(){
 
     if(circuitReady){
         msg.style.color='green';
-        msg.innerHTML='✅ Circuit Complete! Touch the obstacle icon.';
+        msg.innerHTML='✅ Circuit Complete! Touch the hand icon.';
     }else{
         msg.style.color='red';
-        msg.innerHTML='❌ Connect all parts correctly first.';
+        msg.innerHTML='❌ Complete the circuit first.';
         deactivateCircuit();
     }
 }
 
-/* OBSTACLE TOUCH */
+/* HAND TOUCH */
 const obstacle=document.getElementById('obstacleIcon');
 
-obstacle.addEventListener('touchstart', activateObstacle);
-obstacle.addEventListener('mousedown', activateObstacle);
+obstacle.addEventListener('touchstart',activateObstacle);
+obstacle.addEventListener('mousedown',activateObstacle);
 
-obstacle.addEventListener('touchend', deactivateObstacle);
-obstacle.addEventListener('mouseup', deactivateObstacle);
-obstacle.addEventListener('mouseleave', deactivateObstacle);
+obstacle.addEventListener('touchend',deactivateObstacle);
+obstacle.addEventListener('mouseup',deactivateObstacle);
+obstacle.addEventListener('mouseleave',deactivateObstacle);
 
 function activateObstacle(e){
     e.preventDefault();
 
     obstacle.classList.add('active');
-    obstacle.innerHTML='🚧';
 
     if(circuitReady){
         activateCircuit();
@@ -315,79 +348,40 @@ function activateObstacle(e){
 
 function deactivateObstacle(){
     obstacle.classList.remove('active');
-    obstacle.innerHTML='✋';
-
     deactivateCircuit();
 }
 
 /* ACTIVATE CIRCUIT */
 function activateCircuit(){
-    deactivateCircuit();
-
     const bulb=document.querySelector('[data-correct="bulb"] .part');
+    const wave=document.getElementById('wave');
 
     if(bulb){
         bulb.classList.add('glow');
         bulb.innerHTML='💡✨';
     }
 
-    animateCurrentFlow();
+    document.querySelectorAll('.wire-path').forEach(w=>w.classList.add('active'));
+
+    wave.classList.add('active');
 
     document.getElementById('message').innerHTML=
-        '🎉 Obstacle Detected! Bulb Turned ON!';
-}
-
-/* CURRENT FLOW */
-function animateCurrentFlow(){
-    const board=document.getElementById('board');
-
-    const path=[
-        [100,100],
-        [790,100],
-        [790,365],
-        [100,365],
-        [100,100]
-    ];
-
-    const dot=document.createElement('div');
-    dot.className='current-dot';
-    board.appendChild(dot);
-
-    let seg=0;
-    let prog=0;
-
-    currentInterval=setInterval(()=>{
-        let start=path[seg];
-        let end=path[seg+1];
-
-        prog+=0.025;
-
-        if(prog>=1){
-            prog=0;
-            seg++;
-            if(seg>=path.length-1) seg=0;
-        }
-
-        const x=start[0]+(end[0]-start[0])*prog;
-        const y=start[1]+(end[1]-start[1])*prog;
-
-        dot.style.left=x+'px';
-        dot.style.top=y+'px';
-    },20);
+        '🎉 Obstacle Detected! Sensor reflected wave and bulb glows!';
 }
 
 /* DEACTIVATE */
 function deactivateCircuit(){
-    clearInterval(currentInterval);
-
-    document.querySelectorAll('.current-dot').forEach(dot=>dot.remove());
-
     const bulb=document.querySelector('[data-correct="bulb"] .part');
+    const wave=document.getElementById('wave');
 
     if(bulb){
         bulb.classList.remove('glow');
         bulb.innerHTML='💡';
     }
+
+    document.querySelectorAll('.wire-path').forEach(w=>w.classList.remove('active'));
+
+    wave.classList.remove('active');
 }
 
 /* RESET */
@@ -398,7 +392,6 @@ function resetGame(){
     circuitReady=false;
 
     obstacle.classList.remove('active');
-    obstacle.innerHTML='✋';
 
     document.getElementById('message').innerHTML='';
 
@@ -409,7 +402,6 @@ function resetGame(){
 
         if(part){
             partsBox.appendChild(part);
-
             slot.innerHTML=
                 slot.dataset.correct.charAt(0).toUpperCase()+
                 slot.dataset.correct.slice(1);
