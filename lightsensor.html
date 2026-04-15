@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Morning Alarm - Light Sensor Circuit Game</title>
+
+<style>
+*{
+    box-sizing:border-box;
+    font-family:Arial, sans-serif;
+}
+
+body{
+    margin:0;
+    background:linear-gradient(to bottom,#87CEEB,#E0F7FF);
+    overflow-x:hidden;
+    transition:background 0.5s ease;
+}
+
+.container{
+    max-width:1200px;
+    margin:auto;
+    padding:20px;
+    text-align:center;
+}
+
+h1{
+    margin-bottom:10px;
+}
+
+.sky{
+    height:180px;
+    position:relative;
+    margin-bottom:20px;
+}
+
+.sunmoon{
+    width:90px;
+    height:90px;
+    border-radius:50%;
+    position:absolute;
+    top:20px;
+    right:60px;
+    background:yellow;
+    box-shadow:0 0 30px yellow;
+    transition:all 0.5s ease;
+}
+
+.circuit{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-wrap:wrap;
+    gap:25px;
+    margin:30px 0;
+}
+
+.component{
+    width:120px;
+    height:120px;
+    border-radius:20px;
+    background:white;
+    border:4px solid #333;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:bold;
+    font-size:18px;
+    position:relative;
+    cursor:pointer;
+    user-select:none;
+}
+
+.wire{
+    width:100px;
+    height:10px;
+    background:#777;
+    border-radius:5px;
+    transition:all 0.3s ease;
+}
+
+.wire.active{
+    background:red;
+    box-shadow:0 0 15px red;
+}
+
+.sensor.active{
+    background:#fff3a3;
+    box-shadow:0 0 25px gold;
+}
+
+.buzzer.active{
+    animation:buzz 0.3s infinite alternate;
+    background:#ffb3b3;
+}
+
+@keyframes buzz{
+    from{transform:rotate(-3deg);}
+    to{transform:rotate(3deg);}
+}
+
+.controls{
+    display:grid;
+    gap:20px;
+    margin-top:20px;
+}
+
+.buttons{
+    display:flex;
+    justify-content:center;
+    flex-wrap:wrap;
+    gap:10px;
+}
+
+button{
+    padding:14px 22px;
+    font-size:18px;
+    border:none;
+    border-radius:12px;
+    background:#1976d2;
+    color:white;
+    cursor:pointer;
+    min-width:130px;
+}
+
+button:hover{
+    background:#125ea8;
+}
+
+.slider-box{
+    max-width:500px;
+    margin:auto;
+    text-align:left;
+}
+
+input[type=range]{
+    width:100%;
+    height:10px;
+}
+
+.status{
+    margin-top:25px;
+    font-size:28px;
+    font-weight:bold;
+    padding:15px;
+    border-radius:15px;
+    background:white;
+    display:inline-block;
+    min-width:300px;
+}
+
+.tooltip{
+    font-size:14px;
+    color:#444;
+    margin-top:5px;
+}
+
+@media(max-width:768px){
+    .component{
+        width:90px;
+        height:90px;
+        font-size:14px;
+    }
+
+    .wire{
+        width:60px;
+    }
+
+    button{
+        min-width:100px;
+        font-size:16px;
+    }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🌞 Morning Alarm Circuit Simulator</h1>
+    <p>Adjust light and threshold to make the alarm ring!</p>
+
+    <div class="sky">
+        <div class="sunmoon" id="sunmoon"></div>
+    </div>
+
+    <div class="circuit">
+        <div class="component" onclick="showInfo('Battery supplies power to the circuit.')">🔋 Battery</div>
+        <div class="wire" id="wire1"></div>
+
+        <div class="component sensor" id="sensor" onclick="showInfo('Light Sensor detects sunlight intensity.')">💡 Sensor</div>
+        <div class="wire" id="wire2"></div>
+
+        <div class="component" onclick="showInfo('Threshold Controller sets the light level needed to activate alarm.')">🎚 Threshold</div>
+        <div class="wire" id="wire3"></div>
+
+        <div class="component buzzer" id="buzzer" onclick="showInfo('Buzzer/Alarm rings when morning light is detected.')">🐔 Alarm</div>
+    </div>
+
+    <div class="tooltip" id="tooltip">Tap components to learn more.</div>
+
+    <div class="controls">
+
+        <div>
+            <h3>Select Time of Day</h3>
+            <div class="buttons">
+                <button onclick="setTime(10)">Night</button>
+                <button onclick="setTime(35)">Early Morning</button>
+                <button onclick="setTime(60)">Morning</button>
+                <button onclick="setTime(95)">Noon</button>
+            </div>
+        </div>
+
+        <div class="slider-box">
+            <label><strong>Light Intensity: <span id="lightValue">35</span>%</strong></label>
+            <input type="range" min="0" max="100" value="35" id="lightSlider">
+        </div>
+
+        <div class="slider-box">
+            <label><strong>Threshold: <span id="thresholdValue">40</span>%</strong></label>
+            <input type="range" min="0" max="100" value="40" id="thresholdSlider">
+        </div>
+
+    </div>
+
+    <div class="status" id="status">Alarm OFF</div>
+</div>
+
+<!-- Online Rooster Sound -->
+<audio id="alarmSound" preload="auto">
+    <source src="https://actions.google.com/sounds/v1/animals/rooster_crow.ogg" type="audio/ogg">
+</audio>
+
+<script>
+const lightSlider = document.getElementById('lightSlider');
+const thresholdSlider = document.getElementById('thresholdSlider');
+const lightValue = document.getElementById('lightValue');
+const thresholdValue = document.getElementById('thresholdValue');
+const statusBox = document.getElementById('status');
+const sensor = document.getElementById('sensor');
+const buzzer = document.getElementById('buzzer');
+const sunmoon = document.getElementById('sunmoon');
+const alarmSound = document.getElementById('alarmSound');
+
+const wires = [
+    document.getElementById('wire1'),
+    document.getElementById('wire2'),
+    document.getElementById('wire3')
+];
+
+let alarmPlaying = false;
+
+function updateCircuit(){
+    const light = parseInt(lightSlider.value);
+    const threshold = parseInt(thresholdSlider.value);
+
+    lightValue.textContent = light;
+    thresholdValue.textContent = threshold;
+
+    if(light > threshold){
+        sensor.classList.add('active');
+        buzzer.classList.add('active');
+        wires.forEach(w=>w.classList.add('active'));
+
+        statusBox.textContent = "🐔 Wake Up! Morning Detected";
+        statusBox.style.background = "#d4ffd4";
+
+        if(!alarmPlaying){
+            alarmSound.currentTime = 0;
+            alarmSound.play();
+            alarmPlaying = true;
+        }
+
+    }else{
+        sensor.classList.remove('active');
+        buzzer.classList.remove('active');
+        wires.forEach(w=>w.classList.remove('active'));
+
+        statusBox.textContent = "Alarm OFF";
+        statusBox.style.background = "white";
+
+        alarmSound.pause();
+        alarmSound.currentTime = 0;
+        alarmPlaying = false;
+    }
+
+    updateSky(light);
+}
+
+function updateSky(light){
+    if(light < 20){
+        document.body.style.background = "linear-gradient(to bottom,#0b1d51,#1e3c72)";
+        sunmoon.style.background = "#ddd";
+        sunmoon.style.boxShadow = "0 0 20px #fff";
+    }else{
+        document.body.style.background = "linear-gradient(to bottom,#87CEEB,#E0F7FF)";
+        sunmoon.style.background = "yellow";
+        sunmoon.style.boxShadow = "0 0 30px yellow";
+    }
+}
+
+function setTime(value){
+    lightSlider.value = value;
+    updateCircuit();
+}
+
+function showInfo(text){
+    document.getElementById('tooltip').textContent = text;
+}
+
+lightSlider.addEventListener('input', updateCircuit);
+thresholdSlider.addEventListener('input', updateCircuit);
+
+updateCircuit();
+</script>
+
+</body>
+</html>
