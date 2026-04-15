@@ -102,13 +102,38 @@ h1{
 }
 
 /* Glow Bulb Animation */
+/* SUPER BRIGHT TWINKLING BULB */
 .glow{
-    animation:glowBulb 1s infinite alternate;
+    animation: superGlow 0.8s infinite alternate ease-in-out;
+    transform-origin: center;
 }
 
-@keyframes glowBulb{
-    from{filter:drop-shadow(0 0 5px yellow);}
-    to{filter:drop-shadow(0 0 25px gold);}
+@keyframes superGlow{
+    0%{
+        transform: scale(1);
+        filter:
+            drop-shadow(0 0 8px #fff176)
+            drop-shadow(0 0 15px yellow)
+            drop-shadow(0 0 25px gold);
+    }
+
+    50%{
+        transform: scale(1.12) rotate(-2deg);
+        filter:
+            drop-shadow(0 0 15px #fff176)
+            drop-shadow(0 0 30px yellow)
+            drop-shadow(0 0 45px gold)
+            drop-shadow(0 0 60px orange);
+    }
+
+    100%{
+        transform: scale(1.18) rotate(2deg);
+        filter:
+            drop-shadow(0 0 20px #fff176)
+            drop-shadow(0 0 40px yellow)
+            drop-shadow(0 0 60px gold)
+            drop-shadow(0 0 80px orange);
+    }
 }
 
 /* Electric flow animation */
