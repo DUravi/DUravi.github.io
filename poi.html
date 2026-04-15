@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Persistence of Vision Experiment</title>
+
+<style>
+*{
+    box-sizing:border-box;
+    font-family:Arial,sans-serif;
+}
+
+body{
+    margin:0;
+    background:linear-gradient(to bottom,#eef7ff,#ffffff);
+    text-align:center;
+}
+
+.container{
+    max-width:1200px;
+    margin:auto;
+    padding:30px 20px 60px 20px;
+}
+
+h1{
+    margin-bottom:10px;
+}
+
+.machine{
+    margin-top:40px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding-top:40px;
+}
+
+.motor{
+    width:220px;
+    height:120px;
+    background:#555;
+    border-radius:20px;
+    position:relative;
+    margin-top:220px;
+}
+
+.shaft{
+    width:16px;
+    height:70px;
+    background:#888;
+    position:absolute;
+    top:-50px;
+    left:102px;
+    border-radius:10px;
+}
+
+.disc{
+    width:280px;
+    height:280px;
+    border-radius:50%;
+    position:absolute;
+    top:-300px;
+    left:-30px;
+    border:8px solid #333;
+    background:white;
+    overflow:hidden;
+}
+
+.dot{
+    width:28px;
+    height:28px;
+    border-radius:50%;
+    position:absolute;
+}
+
+.ring{
+    position:absolute;
+    border-radius:50%;
+    border-style:solid;
+    opacity:0;
+    transition:opacity 0.4s;
+}
+
+.controls{
+    margin-top:40px;
+    max-width:700px;
+    margin-left:auto;
+    margin-right:auto;
+}
+
+button{
+    padding:14px 22px;
+    font-size:18px;
+    border:none;
+    border-radius:12px;
+    background:#1976d2;
+    color:white;
+    cursor:pointer;
+    margin:5px;
+}
+
+.slider-box{
+    text-align:left;
+    margin:20px 0;
+}
+
+input[type=range]{
+    width:100%;
+}
+
+.status{
+    margin-top:20px;
+    font-size:24px;
+    font-weight:bold;
+    background:white;
+    padding:15px;
+    border-radius:15px;
+    display:inline-block;
+}
+
+.info{
+    margin-top:20px;
+    max-width:900px;
+    margin-left:auto;
+    margin-right:auto;
+    font-size:18px;
+    color:#444;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🌀 Persistence of Vision Experiment</h1>
+
+    <div class="machine">
+        <div class="motor">
+            <div class="shaft"></div>
+
+            <div class="disc" id="disc">
+
+                <div class="dot" style="background:blue; top:30px; left:125px;"></div>
+                <div class="dot" style="background:orange; top:125px; left:220px;"></div>
+                <div class="dot" style="background:green; top:220px; left:125px;"></div>
+
+                <div class="ring" id="ring1" style="width:220px;height:220px;top:30px;left:30px;border:14px solid blue;"></div>
+                <div class="ring" id="ring2" style="width:160px;height:160px;top:60px;left:60px;border:14px solid orange;"></div>
+                <div class="ring" id="ring3" style="width:100px;height:100px;top:90px;left:90px;border:14px solid green;"></div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button onclick="toggleMotor()">▶ Start / Stop Motor</button>
+
+        <div class="slider-box">
+            <label><strong>Motor Speed: <span id="speedValue">5</span></strong></label>
+            <input type="range" min="1" max="20" value="5" id="speedSlider">
+        </div>
+    </div>
+
+    <div class="status" id="status">Motor OFF</div>
+
+    <div class="info" id="infoText">
+        At low speed, individual colored dots are visible.
+    </div>
+</div>
+
+<script>
+const disc = document.getElementById('disc');
+const speedSlider = document.getElementById('speedSlider');
+const speedValue = document.getElementById('speedValue');
+const statusBox = document.getElementById('status');
+const infoText = document.getElementById('infoText');
+
+const rings = [
+    document.getElementById('ring1'),
+    document.getElementById('ring2'),
+    document.getElementById('ring3')
+];
+
+let speed = 5;
+let spinning = false;
+let rotation = 0;
+let animation;
+
+function animateDisc(){
+    if(!spinning) return;
+
+    rotation += speed;
+    disc.style.transform = `rotate(${rotation}deg)`;
+
+    if(speed < 6){
+        rings.forEach(r => r.style.opacity = 0);
+        infoText.textContent = "Low speed: You can see separate colored dots.";
+        statusBox.textContent = "Motor Running Slowly";
+    }
+    else if(speed < 12){
+        rings.forEach(r => r.style.opacity = 0.4);
+        infoText.textContent = "Medium speed: Dots begin to blur into partial circles.";
+        statusBox.textContent = "Partial Persistence Effect";
+    }
+    else{
+        rings.forEach(r => r.style.opacity = 1);
+        infoText.textContent = "High speed: Dots merge into continuous circles due to persistence of vision.";
+        statusBox.textContent = "Persistence of Vision Visible!";
+    }
+
+    animation = requestAnimationFrame(animateDisc);
+}
+
+function toggleMotor(){
+    spinning = !spinning;
+
+    if(spinning){
+        animateDisc();
+    }else{
+        cancelAnimationFrame(animation);
+        statusBox.textContent = "Motor OFF";
+        infoText.textContent = "At low speed, individual colored dots are visible.";
+        rings.forEach(r => r.style.opacity = 0);
+    }
+}
+
+speedSlider.addEventListener('input', ()=>{
+    speed = parseInt(speedSlider.value);
+    speedValue.textContent = speed;
+});
+</script>
+
+</body>
+</html>
