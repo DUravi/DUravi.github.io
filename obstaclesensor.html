@@ -28,10 +28,7 @@ body{
     box-shadow:0 10px 30px rgba(0,0,0,0.2);
     text-align:center;
 }
-h1{
-    color:#6a00ff;
-    margin-bottom:10px;
-}
+h1{color:#6a00ff;}
 .instructions{
     background:#f5edff;
     padding:12px;
@@ -40,14 +37,12 @@ h1{
     font-size:15px;
 }
 
-/* =========================
-   CIRCUIT BOARD
-========================= */
+/* BOARD */
 .circuit-board{
     position:relative;
     width:100%;
     max-width:950px;
-    height:500px;
+    height:520px;
     margin:auto;
     background:#eef8ff;
     border:4px dashed #9ed0ff;
@@ -68,8 +63,8 @@ h1{
 /* SLOTS */
 .slot{
     position:absolute;
-    width:110px;
-    height:110px;
+    width:120px;
+    height:120px;
     border:3px dashed #999;
     border-radius:20px;
     background:#fff;
@@ -81,7 +76,7 @@ h1{
     z-index:2;
 }
 
-/* COMPONENTS */
+/* PARTS */
 .parts{
     display:flex;
     justify-content:center;
@@ -90,8 +85,8 @@ h1{
     margin-top:20px;
 }
 .part{
-    width:110px;
-    height:110px;
+    width:120px;
+    height:120px;
     border-radius:20px;
     border:3px solid #ddd;
     background:#fff;
@@ -110,25 +105,40 @@ h1{
     box-shadow:0 0 15px rgba(106,0,255,.35);
 }
 
-/* SENSOR PAD */
-.sensor-zone{
-    margin-top:20px;
-    padding:18px;
-    font-size:20px;
-    font-weight:bold;
-    background:radial-gradient(circle,#222 20%,#444 60%,#666 100%);
-    color:white;
-    border:4px solid #00e5ff;
-    border-radius:18px;
-    user-select:none;
-    touch-action:none;
-}
-.sensor-zone.active{
-    background:radial-gradient(circle,#ff9800,#ff5722);
-    border-color:#ffd54f;
+/* SENSOR IMAGE */
+.sensor-part img{
+    width:85%;
+    height:85%;
+    object-fit:contain;
+    pointer-events:none;
 }
 
-/* BULB GLOW */
+/* OBSTACLE ICON */
+.obstacle-icon{
+    position:absolute;
+    top:205px;
+    right:180px;
+    width:90px;
+    height:90px;
+    border-radius:50%;
+    background:radial-gradient(circle,#222 20%,#444 60%,#666 100%);
+    border:4px solid #00e5ff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:40px;
+    cursor:pointer;
+    z-index:10;
+    user-select:none;
+    transition:.3s;
+}
+.obstacle-icon.active{
+    background:radial-gradient(circle,#ff9800,#ff5722);
+    border-color:#ffd54f;
+    transform:scale(1.1);
+}
+
+/* BULB */
 .glow{
     animation:glowBulb .7s infinite alternate ease-in-out;
 }
@@ -145,7 +155,7 @@ h1{
     }
 }
 
-/* CURRENT FLOW DOT */
+/* CURRENT FLOW */
 .current-dot{
     position:absolute;
     width:16px;
@@ -178,19 +188,6 @@ button:hover{
     font-weight:bold;
     min-height:30px;
 }
-
-/* RESPONSIVE */
-@media(max-width:768px){
-    .slot,.part{
-        width:85px;
-        height:85px;
-        font-size:32px;
-    }
-
-    .circuit-board{
-        height:420px;
-    }
-}
 </style>
 </head>
 <body>
@@ -199,39 +196,41 @@ button:hover{
     <h1>🚧 Obstacle Sensor Circuit Game</h1>
 
     <div class="instructions">
-        <b>Instructions:</b><br>
-        1. Tap a component<br>
-        2. Tap its correct place in the circuit<br>
-        3. Press "Check Circuit"<br>
-        4. Touch the sensor pad with your hand to detect obstacle
+        Build the circuit, then touch the obstacle icon to simulate detection.
     </div>
 
     <div class="circuit-board" id="board">
 
-        <!-- CIRCUIT WIRING -->
-        <div class="wire-path wire-horizontal" style="top:95px; left:145px; width:650px;"></div>
-        <div class="wire-path wire-vertical" style="top:145px; right:95px; height:210px;"></div>
-        <div class="wire-path wire-horizontal" style="bottom:95px; left:145px; width:650px;"></div>
-        <div class="wire-path wire-vertical" style="top:145px; left:95px; height:210px;"></div>
+        <!-- WIRING -->
+        <div class="wire-path wire-horizontal" style="top:100px; left:155px; width:640px;"></div>
+        <div class="wire-path wire-vertical" style="top:155px; right:100px; height:210px;"></div>
+        <div class="wire-path wire-horizontal" style="bottom:100px; left:155px; width:640px;"></div>
+        <div class="wire-path wire-vertical" style="top:155px; left:100px; height:210px;"></div>
 
         <!-- COMPONENT SLOTS -->
         <div class="slot" data-correct="battery" style="top:40px; left:40px;">Battery</div>
+
         <div class="slot" data-correct="sensor" style="top:40px; right:40px;">Sensor</div>
+
         <div class="slot" data-correct="bulb" style="bottom:40px; right:40px;">Bulb</div>
+
         <div class="slot" data-correct="wire" style="bottom:40px; left:40px;">Wire</div>
+
+        <!-- OBSTACLE -->
+        <div class="obstacle-icon" id="obstacleIcon">✋</div>
     </div>
 
     <!-- COMPONENTS -->
     <div class="parts">
         <div class="part" data-part="battery">🔋</div>
-        <div class="part" data-part="sensor">📡</div>
-        <div class="part" data-part="bulb">💡</div>
-        <div class="part" data-part="wire">〰️</div>
-    </div>
 
-    <!-- TOUCH SENSOR -->
-    <div class="sensor-zone" id="sensorZone">
-        👋 Touch Sensor With Hand
+        <div class="part sensor-part" data-part="sensor">
+            <img src="obstacle-sensor.png" alt="Obstacle Sensor">
+        </div>
+
+        <div class="part" data-part="bulb">💡</div>
+
+        <div class="part" data-part="wire">〰️</div>
     </div>
 
     <div>
@@ -243,55 +242,49 @@ button:hover{
 </div>
 
 <script>
-let selectedPart = null;
-let circuitReady = false;
-let currentInterval = null;
+let selectedPart=null;
+let circuitReady=false;
+let currentInterval=null;
 
-/* =========================
-   SELECT COMPONENT
-========================= */
+/* SELECT PART */
 document.querySelectorAll('.part').forEach(part=>{
     part.addEventListener('click',()=>{
         document.querySelectorAll('.part').forEach(p=>p.classList.remove('selected'));
-        selectedPart = part;
+        selectedPart=part;
         part.classList.add('selected');
     });
 });
 
-/* =========================
-   PLACE COMPONENT
-========================= */
+/* PLACE PART */
 document.querySelectorAll('.slot').forEach(slot=>{
     slot.addEventListener('click',()=>{
         if(!selectedPart) return;
         if(slot.querySelector('.part')) return;
 
-        slot.innerHTML = '';
+        slot.innerHTML='';
         slot.appendChild(selectedPart);
 
         selectedPart.classList.remove('selected');
-        selectedPart = null;
+        selectedPart=null;
     });
 });
 
-/* =========================
-   CHECK CIRCUIT
-========================= */
+/* CHECK CIRCUIT */
 function checkCircuit(){
-    circuitReady = true;
+    circuitReady=true;
 
     document.querySelectorAll('.slot').forEach(slot=>{
-        const placed = slot.querySelector('.part');
-        if(!placed || placed.dataset.part !== slot.dataset.correct){
-            circuitReady = false;
+        const placed=slot.querySelector('.part');
+        if(!placed || placed.dataset.part!==slot.dataset.correct){
+            circuitReady=false;
         }
     });
 
-    const msg = document.getElementById('message');
+    const msg=document.getElementById('message');
 
     if(circuitReady){
         msg.style.color='green';
-        msg.innerHTML='✅ Circuit Complete! Now touch the sensor pad.';
+        msg.innerHTML='✅ Circuit Complete! Touch the obstacle icon.';
     }else{
         msg.style.color='red';
         msg.innerHTML='❌ Connect all parts correctly first.';
@@ -299,43 +292,39 @@ function checkCircuit(){
     }
 }
 
-/* =========================
-   SENSOR TOUCH DETECTION
-========================= */
-const sensorZone = document.getElementById('sensorZone');
+/* OBSTACLE TOUCH */
+const obstacle=document.getElementById('obstacleIcon');
 
-sensorZone.addEventListener('touchstart', activateSensor);
-sensorZone.addEventListener('mousedown', activateSensor);
+obstacle.addEventListener('touchstart', activateObstacle);
+obstacle.addEventListener('mousedown', activateObstacle);
 
-sensorZone.addEventListener('touchend', deactivateSensor);
-sensorZone.addEventListener('mouseup', deactivateSensor);
-sensorZone.addEventListener('mouseleave', deactivateSensor);
+obstacle.addEventListener('touchend', deactivateObstacle);
+obstacle.addEventListener('mouseup', deactivateObstacle);
+obstacle.addEventListener('mouseleave', deactivateObstacle);
 
-function activateSensor(e){
+function activateObstacle(e){
     e.preventDefault();
 
-    sensorZone.classList.add('active');
-    sensorZone.innerHTML='🚧 Obstacle Detected!';
+    obstacle.classList.add('active');
+    obstacle.innerHTML='🚧';
 
     if(circuitReady){
         activateCircuit();
     }
 }
 
-function deactivateSensor(){
-    sensorZone.classList.remove('active');
-    sensorZone.innerHTML='👋 Touch Sensor With Hand';
+function deactivateObstacle(){
+    obstacle.classList.remove('active');
+    obstacle.innerHTML='✋';
 
     deactivateCircuit();
 }
 
-/* =========================
-   ACTIVATE CIRCUIT
-========================= */
+/* ACTIVATE CIRCUIT */
 function activateCircuit(){
     deactivateCircuit();
 
-    const bulb = document.querySelector('[data-correct="bulb"] .part');
+    const bulb=document.querySelector('[data-correct="bulb"] .part');
 
     if(bulb){
         bulb.classList.add('glow');
@@ -344,36 +333,34 @@ function activateCircuit(){
 
     animateCurrentFlow();
 
-    document.getElementById('message').innerHTML =
+    document.getElementById('message').innerHTML=
         '🎉 Obstacle Detected! Bulb Turned ON!';
 }
 
-/* =========================
-   CURRENT FLOW ANIMATION
-========================= */
+/* CURRENT FLOW */
 function animateCurrentFlow(){
-    const board = document.getElementById('board');
+    const board=document.getElementById('board');
 
-    const path = [
-        [95,95],
-        [790,95],
-        [790,355],
-        [95,355],
-        [95,95]
+    const path=[
+        [100,100],
+        [790,100],
+        [790,365],
+        [100,365],
+        [100,100]
     ];
 
-    const dot = document.createElement('div');
+    const dot=document.createElement('div');
     dot.className='current-dot';
     board.appendChild(dot);
 
     let seg=0;
     let prog=0;
 
-    currentInterval = setInterval(()=>{
+    currentInterval=setInterval(()=>{
         let start=path[seg];
         let end=path[seg+1];
 
-        prog += 0.025;
+        prog+=0.025;
 
         if(prog>=1){
             prog=0;
@@ -386,19 +373,16 @@ function animateCurrentFlow(){
 
         dot.style.left=x+'px';
         dot.style.top=y+'px';
-
     },20);
 }
 
-/* =========================
-   DEACTIVATE CIRCUIT
-========================= */
+/* DEACTIVATE */
 function deactivateCircuit(){
     clearInterval(currentInterval);
 
     document.querySelectorAll('.current-dot').forEach(dot=>dot.remove());
 
-    const bulb = document.querySelector('[data-correct="bulb"] .part');
+    const bulb=document.querySelector('[data-correct="bulb"] .part');
 
     if(bulb){
         bulb.classList.remove('glow');
@@ -406,29 +390,28 @@ function deactivateCircuit(){
     }
 }
 
-/* =========================
-   RESET GAME
-========================= */
+/* RESET */
 function resetGame(){
     deactivateCircuit();
 
-    selectedPart = null;
-    circuitReady = false;
+    selectedPart=null;
+    circuitReady=false;
+
+    obstacle.classList.remove('active');
+    obstacle.innerHTML='✋';
 
     document.getElementById('message').innerHTML='';
 
-    sensorZone.classList.remove('active');
-    sensorZone.innerHTML='👋 Touch Sensor With Hand';
-
-    const partsBox = document.querySelector('.parts');
+    const partsBox=document.querySelector('.parts');
 
     document.querySelectorAll('.slot').forEach(slot=>{
-        const part = slot.querySelector('.part');
+        const part=slot.querySelector('.part');
 
         if(part){
             partsBox.appendChild(part);
-            slot.innerHTML =
-                slot.dataset.correct.charAt(0).toUpperCase() +
+
+            slot.innerHTML=
+                slot.dataset.correct.charAt(0).toUpperCase()+
                 slot.dataset.correct.slice(1);
         }
     });
