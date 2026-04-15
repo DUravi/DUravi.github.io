@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pendulum Period Simulator</title>
+
+<style>
+*{
+    box-sizing:border-box;
+    font-family:Arial,sans-serif;
+}
+body{
+    margin:0;
+    background:linear-gradient(to bottom,#dfefff,#ffffff);
+    text-align:center;
+}
+.container{
+    max-width:1300px;
+    margin:auto;
+    padding:20px;
+}
+h1{
+    margin-bottom:10px;
+}
+
+.simulator{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    margin-top:20px;
+}
+
+.pendulum-box{
+    width:500px;
+    height:420px;
+    position:relative;
+    border-radius:20px;
+    background:#f5f5f5;
+    border:3px solid #ccc;
+    overflow:hidden;
+}
+
+.support{
+    width:160px;
+    height:20px;
+    background:#555;
+    position:absolute;
+    top:20px;
+    left:170px;
+    border-radius:10px;
+}
+
+.sensor{
+    position:absolute;
+    bottom:50px;
+    left:235px;
+    width:30px;
+    height:50px;
+    background:#1976d2;
+    border-radius:8px;
+    color:white;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:12px;
+}
+
+.rod{
+    position:absolute;
+    width:4px;
+    background:#333;
+    top:40px;
+    left:248px;
+    transform-origin:top center;
+}
+
+.bob{
+    width:40px;
+    height:40px;
+    background:red;
+    border-radius:50%;
+    position:absolute;
+    left:-18px;
+    bottom:-20px;
+}
+
+.controls{
+    margin-top:30px;
+    max-width:700px;
+}
+
+.buttons{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:10px;
+    margin-bottom:20px;
+}
+
+button{
+    padding:14px 22px;
+    font-size:18px;
+    border:none;
+    border-radius:12px;
+    background:#1976d2;
+    color:white;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#125ea8;
+}
+
+.slider-box{
+    text-align:left;
+    margin:15px 0;
+}
+
+input[type=range]{
+    width:100%;
+}
+
+.status{
+    margin-top:20px;
+    font-size:24px;
+    font-weight:bold;
+    padding:15px;
+    background:white;
+    border-radius:15px;
+    display:inline-block;
+}
+
+.tooltip{
+    margin-top:10px;
+    color:#555;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h1>⏱ Pendulum Period Simulator</h1>
+    <p>Measure time for 10 beeps and explore pendulum period!</p>
+
+    <div class="simulator">
+        <div class="pendulum-box">
+            <div class="support"></div>
+            <div class="sensor">📡</div>
+
+            <div class="rod" id="rod">
+                <div class="bob"></div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="buttons">
+                <button onclick="setAmplitude(15)">Small Swing</button>
+                <button onclick="setAmplitude(30)">Medium Swing</button>
+                <button onclick="setAmplitude(45)">Large Swing</button>
+            </div>
+
+            <div class="slider-box">
+                <label><strong>Pendulum Length: <span id="lengthValue">200</span> px</strong></label>
+                <input type="range" min="120" max="300" value="200" id="lengthSlider">
+            </div>
+
+            <div class="buttons">
+                <button onclick="startExperiment()">▶ Start Experiment</button>
+                <button onclick="stopExperiment()">⏹ Stop</button>
+            </div>
+        </div>
+
+        <div class="status" id="status">Ready to Start</div>
+        <div class="tooltip" id="tooltip">Observe that changing swing size does NOT change period much.</div>
+    </div>
+</div>
+
+<script>
+const rod = document.getElementById('rod');
+const lengthSlider = document.getElementById('lengthSlider');
+const lengthValue = document.getElementById('lengthValue');
+const statusBox = document.getElementById('status');
+
+let amplitude = 15;
+let angle = 0;
+let time = 0;
+let animation;
+let beepCount = 0;
+let startTime = 0;
+let lastCross = false;
+
+let audioContext;
+
+function beep(){
+    if(!audioContext){
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    }
+
+    const osc = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+
+    osc.type = 'square';
+    osc.frequency.value = 800;
+    gain.gain.value = 0.05;
+
+    osc.connect(gain);
+    gain.connect(audioContext.destination);
+
+    osc.start();
+    osc.stop(audioContext.currentTime + 0.08);
+}
+
+function updatePendulum(){
+    const length = parseInt(lengthSlider.value);
+
+    rod.style.height = length + 'px';
+
+    const period = 2 * Math.PI * Math.sqrt(length / 300);
+
+    time += 0.03;
+
+    angle = amplitude * Math.cos((2*Math.PI/period)*time);
+
+    rod.style.transform = `rotate(${angle}deg)`;
+
+    if(Math.abs(angle) < 1){
+        if(!lastCross){
+            beep();
+            beepCount++;
+
+            if(beepCount === 1){
+                startTime = Date.now();
+            }
+
+            if(beepCount >= 10){
+                const totalTime = ((Date.now() - startTime)/1000).toFixed(2);
+                statusBox.textContent = `10 Beeps in ${totalTime}s`;
+                stopExperiment();
+                return;
+            }
+
+            lastCross = true;
+        }
+    }else{
+        lastCross = false;
+    }
+
+    animation = requestAnimationFrame(updatePendulum);
+}
+
+function startExperiment(){
+    stopExperiment();
+    beepCount = 0;
+    time = 0;
+    statusBox.textContent = "Experiment Running...";
+    updatePendulum();
+}
+
+function stopExperiment(){
+    cancelAnimationFrame(animation);
+}
+
+function setAmplitude(val){
+    amplitude = val;
+    statusBox.textContent = `Swing Angle Set to ${val}°`;
+}
+
+lengthSlider.addEventListener('input', ()=>{
+    lengthValue.textContent = lengthSlider.value;
+    rod.style.height = lengthSlider.value + 'px';
+});
+
+rod.style.height = lengthSlider.value + 'px';
+</script>
+
+</body>
+</html>
