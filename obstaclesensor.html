@@ -51,25 +51,26 @@ h1{color:#6a00ff;}
     overflow:hidden;
 }
 
-/* WIRING */
+/* WIRES */
 .wire-path{
     position:absolute;
     background:#555;
     border-radius:10px;
     opacity:.25;
-    transition:.3s;
+    transition:.35s ease;
 }
 .wire-horizontal{height:12px;}
 .wire-vertical{width:12px;}
 
-/* ACTIVE CURRENT GLOW */
+/* RED CURRENT FLOW GLOW */
 .wire-path.active{
-    background:#00e5ff;
-    box-shadow:
-        0 0 10px #00e5ff,
-        0 0 20px #00e5ff,
-        0 0 35px #00e5ff;
+    background:#ff2d2d;
     opacity:1;
+    box-shadow:
+        0 0 10px #ff2d2d,
+        0 0 20px #ff2d2d,
+        0 0 35px #ff2d2d,
+        0 0 50px rgba(255,0,0,0.5);
 }
 
 /* SLOTS */
@@ -116,6 +117,7 @@ h1{color:#6a00ff;}
     box-shadow:0 0 15px rgba(106,0,255,.35);
 }
 
+/* SENSOR IMAGE */
 .sensor-part img{
     width:85%;
     height:85%;
@@ -146,47 +148,6 @@ h1{color:#6a00ff;}
     background:#fff3cd;
 }
 
-/* RADIO WAVES */
-.wave{
-    position:absolute;
-    width:0;
-    height:6px;
-    background:#ff4d4d;
-    top:250px;
-    right:250px;
-    border-radius:10px;
-    transform-origin:right center;
-    opacity:0;
-    z-index:8;
-}
-.wave.active{
-    animation:waveMove 1s infinite;
-}
-
-@keyframes waveMove{
-    0%{
-        width:0;
-        opacity:0;
-    }
-    25%{
-        width:70px;
-        opacity:1;
-    }
-    50%{
-        width:140px;
-        opacity:1;
-    }
-    75%{
-        width:70px;
-        opacity:1;
-        background:#00c853;
-    }
-    100%{
-        width:0;
-        opacity:0;
-    }
-}
-
 /* BULB */
 .glow{
     animation:bulbGlow .7s infinite alternate ease-in-out;
@@ -215,7 +176,9 @@ button{
     margin:10px;
     cursor:pointer;
 }
-button:hover{background:#5200cc;}
+button:hover{
+    background:#5200cc;
+}
 
 .message{
     margin-top:15px;
@@ -231,13 +194,13 @@ button:hover{background:#5200cc;}
     <h1>🚧 Obstacle Sensor Circuit Game</h1>
 
     <div class="instructions">
-        Build the circuit, then touch the hand icon to place obstacle.<br>
-        Watch the sensor send and receive waves!
+        Build the circuit and touch the hand icon to simulate obstacle detection.<br>
+        When detected, current flows through the wire and bulb glows.
     </div>
 
-    <div class="circuit-board" id="board">
+    <div class="circuit-board">
 
-        <!-- WIRES -->
+        <!-- CIRCUIT WIRES -->
         <div class="wire-path wire-horizontal" style="top:100px; left:155px; width:660px;"></div>
         <div class="wire-path wire-vertical" style="top:155px; right:100px; height:220px;"></div>
         <div class="wire-path wire-horizontal" style="bottom:100px; left:155px; width:660px;"></div>
@@ -249,10 +212,7 @@ button:hover{background:#5200cc;}
         <div class="slot" data-correct="bulb" style="bottom:40px; right:40px;">Bulb</div>
         <div class="slot" data-correct="wire" style="bottom:40px; left:40px;">Wire</div>
 
-        <!-- RADIO WAVE -->
-        <div class="wave" id="wave"></div>
-
-        <!-- HAND ICON -->
+        <!-- OBSTACLE HAND -->
         <div class="obstacle-icon" id="obstacleIcon">✋</div>
     </div>
 
@@ -309,6 +269,7 @@ function checkCircuit(){
 
     document.querySelectorAll('.slot').forEach(slot=>{
         const placed=slot.querySelector('.part');
+
         if(!placed || placed.dataset.part!==slot.dataset.correct){
             circuitReady=false;
         }
@@ -326,7 +287,7 @@ function checkCircuit(){
     }
 }
 
-/* HAND TOUCH */
+/* OBSTACLE TOUCH */
 const obstacle=document.getElementById('obstacleIcon');
 
 obstacle.addEventListener('touchstart',activateObstacle);
@@ -354,34 +315,32 @@ function deactivateObstacle(){
 /* ACTIVATE CIRCUIT */
 function activateCircuit(){
     const bulb=document.querySelector('[data-correct="bulb"] .part');
-    const wave=document.getElementById('wave');
 
     if(bulb){
         bulb.classList.add('glow');
         bulb.innerHTML='💡✨';
     }
 
-    document.querySelectorAll('.wire-path').forEach(w=>w.classList.add('active'));
-
-    wave.classList.add('active');
+    document.querySelectorAll('.wire-path').forEach(wire=>{
+        wire.classList.add('active');
+    });
 
     document.getElementById('message').innerHTML=
-        '🎉 Obstacle Detected! Sensor reflected wave and bulb glows!';
+        '🎉 Obstacle Detected! Current is flowing through the wires!';
 }
 
-/* DEACTIVATE */
+/* DEACTIVATE CIRCUIT */
 function deactivateCircuit(){
     const bulb=document.querySelector('[data-correct="bulb"] .part');
-    const wave=document.getElementById('wave');
 
     if(bulb){
         bulb.classList.remove('glow');
         bulb.innerHTML='💡';
     }
 
-    document.querySelectorAll('.wire-path').forEach(w=>w.classList.remove('active'));
-
-    wave.classList.remove('active');
+    document.querySelectorAll('.wire-path').forEach(wire=>{
+        wire.classList.remove('active');
+    });
 }
 
 /* RESET */
@@ -402,6 +361,7 @@ function resetGame(){
 
         if(part){
             partsBox.appendChild(part);
+
             slot.innerHTML=
                 slot.dataset.correct.charAt(0).toUpperCase()+
                 slot.dataset.correct.slice(1);
