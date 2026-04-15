@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Obstacle Sensor Circuit Game</title>
+
+<style>
+/* =========================
+   PAGE STYLING
+========================= */
+body{
+    margin:0;
+    font-family:'Comic Sans MS', cursive;
+    background:linear-gradient(135deg,#c9f2ff,#ead1ff);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+    padding:15px;
+}
+.game-container{
+    background:#fff;
+    width:100%;
+    max-width:1100px;
+    border-radius:25px;
+    padding:20px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.2);
+    text-align:center;
+}
+h1{
+    color:#6a00ff;
+    margin-bottom:10px;
+}
+.instructions{
+    background:#f5edff;
+    padding:12px;
+    border-radius:15px;
+    margin-bottom:18px;
+    font-size:15px;
+}
+
+/* =========================
+   CIRCUIT BOARD
+========================= */
+.circuit-board{
+    position:relative;
+    width:100%;
+    max-width:950px;
+    height:500px;
+    margin:auto;
+    background:#eef8ff;
+    border:4px dashed #9ed0ff;
+    border-radius:20px;
+    overflow:hidden;
+}
+
+/* FIXED CIRCUIT WIRES */
+.wire-path{
+    position:absolute;
+    background:#444;
+    border-radius:10px;
+    opacity:.18;
+}
+.wire-horizontal{height:10px;}
+.wire-vertical{width:10px;}
+
+/* SLOTS */
+.slot{
+    position:absolute;
+    width:110px;
+    height:110px;
+    border:3px dashed #999;
+    border-radius:20px;
+    background:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:15px;
+    color:#666;
+    z-index:2;
+}
+
+/* COMPONENTS */
+.parts{
+    display:flex;
+    justify-content:center;
+    gap:18px;
+    flex-wrap:wrap;
+    margin-top:20px;
+}
+.part{
+    width:110px;
+    height:110px;
+    border-radius:20px;
+    border:3px solid #ddd;
+    background:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:42px;
+    cursor:pointer;
+    transition:.25s;
+    user-select:none;
+    touch-action:manipulation;
+}
+.part.selected{
+    border-color:#6a00ff;
+    transform:scale(1.08);
+    box-shadow:0 0 15px rgba(106,0,255,.35);
+}
+
+/* SENSOR PAD */
+.sensor-zone{
+    margin-top:20px;
+    padding:18px;
+    font-size:20px;
+    font-weight:bold;
+    background:radial-gradient(circle,#222 20%,#444 60%,#666 100%);
+    color:white;
+    border:4px solid #00e5ff;
+    border-radius:18px;
+    user-select:none;
+    touch-action:none;
+}
+.sensor-zone.active{
+    background:radial-gradient(circle,#ff9800,#ff5722);
+    border-color:#ffd54f;
+}
+
+/* BULB GLOW */
+.glow{
+    animation:glowBulb .7s infinite alternate ease-in-out;
+}
+@keyframes glowBulb{
+    from{
+        transform:scale(1);
+        filter:drop-shadow(0 0 10px yellow);
+    }
+    to{
+        transform:scale(1.2);
+        filter:
+            drop-shadow(0 0 25px yellow)
+            drop-shadow(0 0 50px orange);
+    }
+}
+
+/* CURRENT FLOW DOT */
+.current-dot{
+    position:absolute;
+    width:16px;
+    height:16px;
+    background:#00e5ff;
+    border-radius:50%;
+    box-shadow:0 0 12px #00e5ff;
+    z-index:5;
+}
+
+/* BUTTONS */
+button{
+    background:#6a00ff;
+    color:white;
+    border:none;
+    padding:14px 22px;
+    font-size:17px;
+    border-radius:14px;
+    margin:10px;
+    cursor:pointer;
+}
+button:hover{
+    background:#5200cc;
+}
+
+/* MESSAGE */
+.message{
+    margin-top:15px;
+    font-size:20px;
+    font-weight:bold;
+    min-height:30px;
+}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+    .slot,.part{
+        width:85px;
+        height:85px;
+        font-size:32px;
+    }
+
+    .circuit-board{
+        height:420px;
+    }
+}
+</style>
+</head>
+<body>
+
+<div class="game-container">
+    <h1>🚧 Obstacle Sensor Circuit Game</h1>
+
+    <div class="instructions">
+        <b>Instructions:</b><br>
+        1. Tap a component<br>
+        2. Tap its correct place in the circuit<br>
+        3. Press "Check Circuit"<br>
+        4. Touch the sensor pad with your hand to detect obstacle
+    </div>
+
+    <div class="circuit-board" id="board">
+
+        <!-- CIRCUIT WIRING -->
+        <div class="wire-path wire-horizontal" style="top:95px; left:145px; width:650px;"></div>
+        <div class="wire-path wire-vertical" style="top:145px; right:95px; height:210px;"></div>
+        <div class="wire-path wire-horizontal" style="bottom:95px; left:145px; width:650px;"></div>
+        <div class="wire-path wire-vertical" style="top:145px; left:95px; height:210px;"></div>
+
+        <!-- COMPONENT SLOTS -->
+        <div class="slot" data-correct="battery" style="top:40px; left:40px;">Battery</div>
+        <div class="slot" data-correct="sensor" style="top:40px; right:40px;">Sensor</div>
+        <div class="slot" data-correct="bulb" style="bottom:40px; right:40px;">Bulb</div>
+        <div class="slot" data-correct="wire" style="bottom:40px; left:40px;">Wire</div>
+    </div>
+
+    <!-- COMPONENTS -->
+    <div class="parts">
+        <div class="part" data-part="battery">🔋</div>
+        <div class="part" data-part="sensor">📡</div>
+        <div class="part" data-part="bulb">💡</div>
+        <div class="part" data-part="wire">〰️</div>
+    </div>
+
+    <!-- TOUCH SENSOR -->
+    <div class="sensor-zone" id="sensorZone">
+        👋 Touch Sensor With Hand
+    </div>
+
+    <div>
+        <button onclick="checkCircuit()">Check Circuit</button>
+        <button onclick="resetGame()">Reset</button>
+    </div>
+
+    <div class="message" id="message"></div>
+</div>
+
+<script>
+let selectedPart = null;
+let circuitReady = false;
+let currentInterval = null;
+
+/* =========================
+   SELECT COMPONENT
+========================= */
+document.querySelectorAll('.part').forEach(part=>{
+    part.addEventListener('click',()=>{
+        document.querySelectorAll('.part').forEach(p=>p.classList.remove('selected'));
+        selectedPart = part;
+        part.classList.add('selected');
+    });
+});
+
+/* =========================
+   PLACE COMPONENT
+========================= */
+document.querySelectorAll('.slot').forEach(slot=>{
+    slot.addEventListener('click',()=>{
+        if(!selectedPart) return;
+        if(slot.querySelector('.part')) return;
+
+        slot.innerHTML = '';
+        slot.appendChild(selectedPart);
+
+        selectedPart.classList.remove('selected');
+        selectedPart = null;
+    });
+});
+
+/* =========================
+   CHECK CIRCUIT
+========================= */
+function checkCircuit(){
+    circuitReady = true;
+
+    document.querySelectorAll('.slot').forEach(slot=>{
+        const placed = slot.querySelector('.part');
+        if(!placed || placed.dataset.part !== slot.dataset.correct){
+            circuitReady = false;
+        }
+    });
+
+    const msg = document.getElementById('message');
+
+    if(circuitReady){
+        msg.style.color='green';
+        msg.innerHTML='✅ Circuit Complete! Now touch the sensor pad.';
+    }else{
+        msg.style.color='red';
+        msg.innerHTML='❌ Connect all parts correctly first.';
+        deactivateCircuit();
+    }
+}
+
+/* =========================
+   SENSOR TOUCH DETECTION
+========================= */
+const sensorZone = document.getElementById('sensorZone');
+
+sensorZone.addEventListener('touchstart', activateSensor);
+sensorZone.addEventListener('mousedown', activateSensor);
+
+sensorZone.addEventListener('touchend', deactivateSensor);
+sensorZone.addEventListener('mouseup', deactivateSensor);
+sensorZone.addEventListener('mouseleave', deactivateSensor);
+
+function activateSensor(e){
+    e.preventDefault();
+
+    sensorZone.classList.add('active');
+    sensorZone.innerHTML='🚧 Obstacle Detected!';
+
+    if(circuitReady){
+        activateCircuit();
+    }
+}
+
+function deactivateSensor(){
+    sensorZone.classList.remove('active');
+    sensorZone.innerHTML='👋 Touch Sensor With Hand';
+
+    deactivateCircuit();
+}
+
+/* =========================
+   ACTIVATE CIRCUIT
+========================= */
+function activateCircuit(){
+    deactivateCircuit();
+
+    const bulb = document.querySelector('[data-correct="bulb"] .part');
+
+    if(bulb){
+        bulb.classList.add('glow');
+        bulb.innerHTML='💡✨';
+    }
+
+    animateCurrentFlow();
+
+    document.getElementById('message').innerHTML =
+        '🎉 Obstacle Detected! Bulb Turned ON!';
+}
+
+/* =========================
+   CURRENT FLOW ANIMATION
+========================= */
+function animateCurrentFlow(){
+    const board = document.getElementById('board');
+
+    const path = [
+        [95,95],
+        [790,95],
+        [790,355],
+        [95,355],
+        [95,95]
+    ];
+
+    const dot = document.createElement('div');
+    dot.className='current-dot';
+    board.appendChild(dot);
+
+    let seg=0;
+    let prog=0;
+
+    currentInterval = setInterval(()=>{
+        let start=path[seg];
+        let end=path[seg+1];
+
+        prog += 0.025;
+
+        if(prog>=1){
+            prog=0;
+            seg++;
+            if(seg>=path.length-1) seg=0;
+        }
+
+        const x=start[0]+(end[0]-start[0])*prog;
+        const y=start[1]+(end[1]-start[1])*prog;
+
+        dot.style.left=x+'px';
+        dot.style.top=y+'px';
+
+    },20);
+}
+
+/* =========================
+   DEACTIVATE CIRCUIT
+========================= */
+function deactivateCircuit(){
+    clearInterval(currentInterval);
+
+    document.querySelectorAll('.current-dot').forEach(dot=>dot.remove());
+
+    const bulb = document.querySelector('[data-correct="bulb"] .part');
+
+    if(bulb){
+        bulb.classList.remove('glow');
+        bulb.innerHTML='💡';
+    }
+}
+
+/* =========================
+   RESET GAME
+========================= */
+function resetGame(){
+    deactivateCircuit();
+
+    selectedPart = null;
+    circuitReady = false;
+
+    document.getElementById('message').innerHTML='';
+
+    sensorZone.classList.remove('active');
+    sensorZone.innerHTML='👋 Touch Sensor With Hand';
+
+    const partsBox = document.querySelector('.parts');
+
+    document.querySelectorAll('.slot').forEach(slot=>{
+        const part = slot.querySelector('.part');
+
+        if(part){
+            partsBox.appendChild(part);
+            slot.innerHTML =
+                slot.dataset.correct.charAt(0).toUpperCase() +
+                slot.dataset.correct.slice(1);
+        }
+    });
+}
+</script>
+
+</body>
+</html>
