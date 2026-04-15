@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Soil Dry Alarm Simulator</title>
+
+<style>
+*{
+    box-sizing:border-box;
+    font-family:Arial,sans-serif;
+}
+body{
+    margin:0;
+    background:linear-gradient(to bottom,#d7f5d7,#f5fff5);
+    text-align:center;
+}
+.container{
+    max-width:1300px;
+    margin:auto;
+    padding:20px;
+}
+h1{
+    margin-bottom:10px;
+}
+.scene{
+    display:flex;
+    justify-content:center;
+    align-items:flex-end;
+    gap:40px;
+    flex-wrap:wrap;
+    margin:20px 0;
+}
+.plant-area{
+    position:relative;
+    width:220px;
+    height:260px;
+}
+.plant{
+    font-size:70px;
+    position:absolute;
+    top:0;
+    width:100%;
+}
+.pot{
+    width:170px;
+    height:110px;
+    background:#8B4513;
+    margin:auto;
+    border-radius:0 0 30px 30px;
+    position:absolute;
+    bottom:0;
+    left:25px;
+}
+.soil{
+    width:150px;
+    height:40px;
+    background:#5c4033;
+    border-radius:20px;
+    position:absolute;
+    top:15px;
+    left:10px;
+    transition:0.3s;
+}
+.sensor-stick{
+    width:12px;
+    height:80px;
+    background:#555;
+    position:absolute;
+    top:20px;
+    right:30px;
+    border-radius:6px;
+}
+.water-drop{
+    position:absolute;
+    font-size:28px;
+    left:50%;
+    top:-30px;
+    opacity:0;
+    animation:drop 1s linear infinite;
+}
+@keyframes drop{
+    0%{top:-20px;opacity:1;}
+    100%{top:120px;opacity:0;}
+}
+
+.circuit{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-wrap:wrap;
+    gap:20px;
+    margin:30px 0;
+}
+.component{
+    width:120px;
+    height:120px;
+    border-radius:20px;
+    background:white;
+    border:4px solid #333;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-weight:bold;
+    font-size:18px;
+    cursor:pointer;
+}
+.wire{
+    width:90px;
+    height:10px;
+    background:#777;
+    border-radius:5px;
+    transition:0.3s;
+}
+.wire.active{
+    background:red;
+    box-shadow:0 0 15px red;
+}
+.sensor.active{
+    background:#fff3a3;
+    box-shadow:0 0 25px gold;
+}
+.buzzer.active{
+    background:#ffb3b3;
+    animation:buzz 0.3s infinite alternate;
+}
+@keyframes buzz{
+    from{transform:rotate(-3deg);}
+    to{transform:rotate(3deg);}
+}
+
+.controls{
+    max-width:600px;
+    margin:auto;
+}
+.slider-box{
+    margin:20px 0;
+    text-align:left;
+}
+input[type=range]{
+    width:100%;
+    height:10px;
+}
+.buttons{
+    display:flex;
+    justify-content:center;
+    gap:10px;
+    flex-wrap:wrap;
+}
+button{
+    padding:14px 20px;
+    border:none;
+    border-radius:12px;
+    background:#1976d2;
+    color:white;
+    font-size:18px;
+    cursor:pointer;
+}
+button:hover{
+    background:#125ea8;
+}
+.status{
+    margin-top:20px;
+    font-size:28px;
+    font-weight:bold;
+    padding:15px;
+    border-radius:15px;
+    display:inline-block;
+    background:white;
+}
+.tooltip{
+    margin-top:10px;
+    font-size:14px;
+    color:#555;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🌱 Soil Dry Alarm Simulator</h1>
+    <p>Check if plant needs water using Moisture Sensor</p>
+
+    <div class="scene">
+        <div class="plant-area">
+            <div class="plant">🌿</div>
+            <div class="water-drop" id="drop">💧</div>
+            <div class="pot">
+                <div class="soil" id="soil"></div>
+                <div class="sensor-stick"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="circuit">
+        <div class="component" onclick="showInfo('Battery supplies power to the circuit.')">🔋 Battery</div>
+        <div class="wire" id="wire1"></div>
+
+        <div class="component sensor" id="sensor" onclick="showInfo('Moisture Sensor checks soil moisture.')">🌱 Sensor</div>
+        <div class="wire" id="wire2"></div>
+
+        <div class="component" onclick="showInfo('Threshold sets dryness level for alarm.')">🎚 Threshold</div>
+        <div class="wire" id="wire3"></div>
+
+        <div class="component buzzer" id="buzzer" onclick="showInfo('Alarm rings when soil is dry.')">🔔 Alarm</div>
+    </div>
+
+    <div class="tooltip" id="tooltip">Tap components to learn more.</div>
+
+    <div class="controls">
+        <div class="buttons">
+            <button onclick="setMoisture(20)">Dry Soil</button>
+            <button onclick="setMoisture(50)">Normal Soil</button>
+            <button onclick="setMoisture(85)">Wet Soil</button>
+        </div>
+
+        <div class="slider-box">
+            <label><strong>Soil Moisture: <span id="moistureValue">50</span>%</strong></label>
+            <input type="range" min="0" max="100" value="50" id="moistureSlider">
+        </div>
+
+        <div class="slider-box">
+            <label><strong>Threshold: <span id="thresholdValue">40</span>%</strong></label>
+            <input type="range" min="0" max="100" value="40" id="thresholdSlider">
+        </div>
+    </div>
+
+    <div class="status" id="status">Plant is Healthy 🌿</div>
+</div>
+
+<script>
+const moistureSlider = document.getElementById('moistureSlider');
+const thresholdSlider = document.getElementById('thresholdSlider');
+const moistureValue = document.getElementById('moistureValue');
+const thresholdValue = document.getElementById('thresholdValue');
+const statusBox = document.getElementById('status');
+const sensor = document.getElementById('sensor');
+const buzzer = document.getElementById('buzzer');
+const soil = document.getElementById('soil');
+const drop = document.getElementById('drop');
+
+const wires = [
+    document.getElementById('wire1'),
+    document.getElementById('wire2'),
+    document.getElementById('wire3')
+];
+
+let audioContext;
+let oscillator;
+let buzzerPlaying = false;
+
+function startBuzzer(){
+    if(buzzerPlaying) return;
+
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+    oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+
+    oscillator.type = 'square';
+    oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+
+    gainNode.gain.setValueAtTime(0.08, audioContext.currentTime);
+
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+
+    oscillator.start();
+
+    buzzerPlaying = true;
+}
+
+function stopBuzzer(){
+    if(oscillator){
+        oscillator.stop();
+        oscillator.disconnect();
+        oscillator = null;
+    }
+
+    buzzerPlaying = false;
+}
+
+function updateCircuit(){
+    const moisture = parseInt(moistureSlider.value);
+    const threshold = parseInt(thresholdSlider.value);
+
+    moistureValue.textContent = moisture;
+    thresholdValue.textContent = threshold;
+
+    soil.style.background = `rgb(${120-moisture}, ${70+moisture}, 50)`;
+
+    if(moisture < threshold){
+        sensor.classList.add('active');
+        buzzer.classList.add('active');
+        wires.forEach(w => w.classList.add('active'));
+
+        statusBox.textContent = "🚨 Soil Dry! Plant Needs Water";
+        statusBox.style.background = "#ffd4d4";
+
+        startBuzzer();
+
+    }else{
+        sensor.classList.remove('active');
+        buzzer.classList.remove('active');
+        wires.forEach(w => w.classList.remove('active'));
+
+        statusBox.textContent = "Plant is Healthy 🌿";
+        statusBox.style.background = "#d4ffd4";
+
+        stopBuzzer();
+    }
+
+    if(moisture > 70){
+        drop.style.opacity = 1;
+    }else{
+        drop.style.opacity = 0;
+    }
+}
+
+function setMoisture(value){
+    moistureSlider.value = value;
+    updateCircuit();
+}
+
+function showInfo(text){
+    document.getElementById('tooltip').textContent = text;
+}
+
+document.body.addEventListener('click', () => {
+    if(audioContext && audioContext.state === 'suspended'){
+        audioContext.resume();
+    }
+});
+
+moistureSlider.addEventListener('input', updateCircuit);
+thresholdSlider.addEventListener('input', updateCircuit);
+
+updateCircuit();
+</script>
+
+</body>
+</html>
