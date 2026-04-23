@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+
+<!-- Prevent zoom & improve touch -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+
+<title>Learn RGB Colors</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    margin: 0;
+    padding: 20px;
+    transition: 0.3s;
+}
+
+/* Light Theme */
+body.light {
+    background: linear-gradient(to right, #f0f0f0, #d9e4f5);
+    color: #000;
+}
+
+/* Dark Theme */
+body.dark {
+    background: linear-gradient(to right, #0f172a, #1e293b);
+    color: #fff;
+}
+
+.container {
+    max-width: 700px;
+    margin: auto;
+}
+
+/* Bigger touch-friendly sliders */
+.slider-box {
+    margin: 20px 0;
+}
+
+input[type="range"] {
+    width: 90%;
+    height: 30px;
+}
+
+/* Color display */
+.color-display {
+    width: 280px;
+    height: 170px;
+    margin: 20px auto;
+    border-radius: 12px;
+    border: 2px solid #333;
+    cursor: pointer;
+}
+
+/* RGB text */
+.rgb-value {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+/* Bigger buttons */
+button {
+    margin: 8px;
+    padding: 15px 20px;
+    font-size: 18px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+}
+
+/* Explanation */
+.explanation {
+    margin-top: 20px;
+    padding: 15px;
+    border-radius: 12px;
+}
+
+body.light .explanation {
+    background: #fff;
+}
+
+body.dark .explanation {
+    background: #1e293b;
+}
+
+/* Theme button */
+.toggle-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+</style>
+</head>
+
+<body class="light">
+
+<button class="toggle-btn" onclick="toggleTheme()">🌙 Theme</button>
+
+<h1>🎨 Learn RGB Colors (0–255)</h1>
+
+<div class="container">
+
+    <!-- Sliders -->
+    <div class="slider-box">
+        Red: <span id="rVal">0</span><br>
+        <input type="range" id="red" min="0" max="255" value="0">
+    </div>
+
+    <div class="slider-box">
+        Green: <span id="gVal">0</span><br>
+        <input type="range" id="green" min="0" max="255" value="0">
+    </div>
+
+    <div class="slider-box">
+        Blue: <span id="bVal">0</span><br>
+        <input type="range" id="blue" min="0" max="255" value="0">
+    </div>
+
+    <!-- Color Display -->
+    <div class="color-display" id="colorBox"></div>
+    <div class="rgb-value" id="rgbText">RGB(0, 0, 0)</div>
+
+    <!-- Preset Buttons -->
+    <div>
+        <button onclick="setColor(255,0,0)">Red</button>
+        <button onclick="setColor(0,255,0)">Green</button>
+        <button onclick="setColor(0,0,255)">Blue</button>
+        <button onclick="setColor(255,255,255)">White</button>
+        <button onclick="setColor(0,0,0)">Black</button>
+        <button onclick="setColor(255,255,0)">Yellow</button>
+    </div>
+
+    <!-- Explanation -->
+    <div class="explanation">
+        <p><b>RGB = Red, Green, Blue</b></p>
+        <p>Each value ranges from <b>0 to 255</b>.</p>
+        <p>0 = no light, 255 = full light.</p>
+        <p>Mix them to create <b>millions of colors!</b></p>
+        <p>👉 Try moving sliders to create your favorite color!</p>
+    </div>
+
+    <!-- Game -->
+    <div>
+        <h3>🎯 Guess the Color</h3>
+        <div class="color-display" id="targetColor" onclick="revealColor()"></div>
+        <p id="targetRGB">Tap the color to reveal RGB</p>
+        <button onclick="generateColor()">New Color</button>
+    </div>
+
+</div>
+
+<script>
+
+let targetR, targetG, targetB;
+
+const red = document.getElementById("red");
+const green = document.getElementById("green");
+const blue = document.getElementById("blue");
+
+function updateColor() {
+    let r = red.value;
+    let g = green.value;
+    let b = blue.value;
+
+    document.getElementById("rVal").innerText = r;
+    document.getElementById("gVal").innerText = g;
+    document.getElementById("bVal").innerText = b;
+
+    let color = `rgb(${r}, ${g}, ${b})`;
+    document.getElementById("colorBox").style.background = color;
+    document.getElementById("rgbText").innerText = color;
+}
+
+red.oninput = updateColor;
+green.oninput = updateColor;
+blue.oninput = updateColor;
+
+function setColor(r, g, b) {
+    red.value = r;
+    green.value = g;
+    blue.value = b;
+    updateColor();
+}
+
+function generateColor() {
+    targetR = Math.floor(Math.random() * 256);
+    targetG = Math.floor(Math.random() * 256);
+    targetB = Math.floor(Math.random() * 256);
+
+    document.getElementById("targetColor").style.background = 
+        `rgb(${targetR}, ${targetG}, ${targetB})`;
+
+    document.getElementById("targetRGB").innerText = "Tap the color to reveal RGB";
+}
+
+function revealColor() {
+    document.getElementById("targetRGB").innerText = 
+        `RGB(${targetR}, ${targetG}, ${targetB})`;
+}
+
+/* Theme toggle */
+function toggleTheme() {
+    document.body.classList.toggle("dark");
+    document.body.classList.toggle("light");
+}
+
+/* Initialize */
+updateColor();
+generateColor();
+
+</script>
+
+</body>
+</html>
