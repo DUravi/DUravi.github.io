@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Robotics Quiz</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(to right, #74ebd5, #ACB6E5);
+    margin: 0;
+    text-align: center;
+}
+
+.container {
+    max-width: 900px;
+    margin: auto;
+    padding: 20px;
+}
+
+h1 {
+    font-size: 40px;
+}
+
+.question {
+    font-size: 28px;
+    margin: 20px 0;
+}
+
+.options button {
+    display: block;
+    width: 100%;
+    padding: 18px;
+    margin: 10px 0;
+    font-size: 22px;
+    border: none;
+    border-radius: 12px;
+    background: white;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.options button:hover {
+    background: #dfe6e9;
+}
+
+.correct {
+    background: #55efc4 !important;
+}
+
+.wrong {
+    background: #ff7675 !important;
+}
+
+#nextBtn, #restartBtn {
+    margin-top: 20px;
+    padding: 15px 30px;
+    font-size: 20px;
+    border: none;
+    border-radius: 10px;
+    background: #0984e3;
+    color: white;
+    cursor: pointer;
+}
+
+#score {
+    font-size: 30px;
+    margin-top: 20px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <h1>🤖 Robotics Quiz</h1>
+    <div id="quiz"></div>
+    <button id="nextBtn" onclick="nextQuestion()">Next</button>
+    <div id="score"></div>
+    <button id="restartBtn" onclick="restartQuiz()" style="display:none;">Restart</button>
+</div>
+
+<script>
+const quizData = [
+{
+    question: "1. What is a robot?",
+    options: ["A toy", "A machine that can do work", "A book", "A plant"],
+    answer: 1
+},
+{
+    question: "2. Robots need what to work?",
+    options: ["Water", "Food", "Power (electricity)", "Air"],
+    answer: 2
+},
+{
+    question: "3. Which of these is a robot?",
+    options: ["Toy robot", "Tree", "Book", "Pencil"],
+    answer: 0
+},
+{
+    question: "4. Who makes robots?",
+    options: ["Doctor", "Teacher", "Engineer", "Farmer"],
+    answer: 2
+},
+{
+    question: "5. Robots can help us in:",
+    options: ["Sleeping", "Cleaning", "Eating", "Running"],
+    answer: 1
+},
+{
+    question: "6. Which robot helps at home?",
+    options: ["Toy car", "Vacuum robot", "Pencil", "Ball"],
+    answer: 1
+},
+{
+    question: "7. Robots follow:",
+    options: ["Songs", "Instructions", "Stories", "Jokes"],
+    answer: 1
+},
+{
+    question: "8. What do robots use to move?",
+    options: ["Wings", "Wheels or legs", "Leaves", "Roots"],
+    answer: 1
+},
+{
+    question: "9. Which part helps robots think?",
+    options: ["Brain (computer)", "Hand", "Foot", "Eye"],
+    answer: 0
+},
+{
+    question: "10. Robots can work in:",
+    options: ["Space", "Water", "Factories", "All of these"],
+    answer: 3
+},
+{
+    question: "11. Which is NOT a robot?",
+    options: ["Robot toy", "Smartphone", "Chair", "Drone"],
+    answer: 2
+},
+{
+    question: "12. Robots can help doctors by:",
+    options: ["Playing games", "Doing surgery", "Singing", "Drawing"],
+    answer: 1
+},
+{
+    question: "13. What do robots use to see?",
+    options: ["Sensors/cameras", "Nose", "Mouth", "Hair"],
+    answer: 0
+},
+{
+    question: "14. A robot cannot:",
+    options: ["Work fast", "Follow commands", "Eat food", "Help humans"],
+    answer: 2
+},
+{
+    question: "15. Which robot can fly?",
+    options: ["Drone", "Car", "Bus", "Train"],
+    answer: 0
+},
+{
+    question: "16. Robots are made by:",
+    options: ["Magic", "Humans", "Animals", "Plants"],
+    answer: 1
+},
+{
+    question: "17. What helps robots feel touch?",
+    options: ["Sensors", "Shoes", "Clothes", "Wheels"],
+    answer: 0
+},
+{
+    question: "18. Robots can be used in schools for:",
+    options: ["Teaching", "Sleeping", "Cooking", "Driving"],
+    answer: 0
+},
+{
+    question: "19. Which device controls a robot?",
+    options: ["Remote/Computer", "Spoon", "Plate", "Bag"],
+    answer: 0
+},
+{
+    question: "20. Robots make our work:",
+    options: ["Hard", "Slow", "Easy", "Boring"],
+    answer: 2
+}
+];
+
+let currentQuestion = 0;
+let score = 0;
+
+function loadQuestion() {
+    const quiz = document.getElementById("quiz");
+    quiz.innerHTML = "";
+
+    let q = quizData[currentQuestion];
+
+    let questionEl = document.createElement("div");
+    questionEl.classList.add("question");
+    questionEl.innerText = q.question;
+
+    let optionsEl = document.createElement("div");
+    optionsEl.classList.add("options");
+
+    q.options.forEach((option, index) => {
+        let btn = document.createElement("button");
+        btn.innerText = option;
+        btn.onclick = () => selectAnswer(btn, index);
+        optionsEl.appendChild(btn);
+    });
+
+    quiz.appendChild(questionEl);
+    quiz.appendChild(optionsEl);
+}
+
+function selectAnswer(button, index) {
+    const buttons = document.querySelectorAll(".options button");
+    buttons.forEach(btn => btn.disabled = true);
+
+    if (index === quizData[currentQuestion].answer) {
+        button.classList.add("correct");
+        score++;
+    } else {
+        button.classList.add("wrong");
+        buttons[quizData[currentQuestion].answer].classList.add("correct");
+    }
+}
+
+function nextQuestion() {
+    currentQuestion++;
+    if (currentQuestion < quizData.length) {
+        loadQuestion();
+    } else {
+        showScore();
+    }
+}
+
+function showScore() {
+    document.getElementById("quiz").innerHTML = "";
+    document.getElementById("nextBtn").style.display = "none";
+    document.getElementById("score").innerText = "🎉 Your Score: " + score + " / " + quizData.length;
+    document.getElementById("restartBtn").style.display = "inline-block";
+}
+
+function restartQuiz() {
+    currentQuestion = 0;
+    score = 0;
+    document.getElementById("nextBtn").style.display = "inline-block";
+    document.getElementById("restartBtn").style.display = "none";
+    document.getElementById("score").innerText = "";
+    loadQuestion();
+}
+
+loadQuestion();
+</script>
+
+</body>
+</html>
